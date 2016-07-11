@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 0;
-	var VERSION_PATCH = 1;
+	var VERSION_PATCH = 2;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -52,7 +52,7 @@ var QBRecord = (function(){
 					delete options.quickbase
 				}
 
-				var settings = $.extend({}, defaults, options || {});
+				var settings = $.extend(true, {}, defaults, options || {});
 
 				that.setDBID(settings.dbid)
 					.setFids(settings.fids)
