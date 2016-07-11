@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 0;
-	var VERSION_PATCH = 3;
+	var VERSION_PATCH = 4;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -128,7 +128,7 @@ var QBRecord = (function(){
 
 			Object.keys(fids).some(function(name){
 				if(fids[name] === field){
-					id = fids[name];
+					id = name;
 
 					return true;
 				}
