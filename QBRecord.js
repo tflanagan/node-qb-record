@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 0;
-	var VERSION_PATCH = 2;
+	var VERSION_PATCH = 3;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -43,6 +43,7 @@ var QBRecord = (function(){
 		this._data = {};
 		this._dbid = '';
 		this._fids = {};
+		this._fields = [];
 
 		var that = this,
 			init = function(){
@@ -143,6 +144,21 @@ var QBRecord = (function(){
 		return this._fids;
 	};
 
+	QBRecord.prototype.getField = function(id){
+		var fields = this.getFields(),
+			i = indexOfObj(fields, 'id', +id);
+
+		if(i === -1){
+			return undefined;
+		}
+
+		return fields[i];
+	};
+
+	QBRecord.prototype.getFields = function(){
+		return this._fields;
+	};
+
 	QBRecord.prototype.load = function(localQuery){
 		var that = this,
 			fids = this.getFids(),
@@ -167,6 +183,8 @@ var QBRecord = (function(){
 			}),
 			options: 'num-1'
 		}).then(function(results){
+			that._fields = results.table.fields;
+
 			if(results.table.records.length === 0){
 				return that;
 			}
@@ -185,7 +203,7 @@ var QBRecord = (function(){
 		});
 	};
 
-	QBRecord.prototype.save = function(whitelistOfFields){
+	QBRecord.prototype.save = function(){
 		var that = this,
 			action = 'API_AddRecord',
 			options = {
@@ -200,12 +218,19 @@ var QBRecord = (function(){
 		}
 
 		Object.keys(this.getFids()).forEach(function(name){
-			if(whitelistOfFields && whitelistOfFields.indexOf(name) !== -1){
+			var fid = that.getFid(name),
+				field = that.getField(fid);
+
+			if(fid <= 5 || [
+				'summary',
+				'virtual',
+				'lookup'
+			].indexOf(field.mode) !== -1){
 				return;
 			}
 
 			options.fields.push({
-				fid: that.getFid(name),
+				fid: fid,
 				value: that.get(name)
 			});
 		});
