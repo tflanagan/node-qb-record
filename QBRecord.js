@@ -221,7 +221,7 @@ var QBRecord = (function(){
 			var fid = that.getFid(name),
 				field = that.getField(fid);
 
-			if(fid <= 5 || [
+			if(!field || fid <= 5 || [
 				'summary',
 				'virtual',
 				'lookup'
