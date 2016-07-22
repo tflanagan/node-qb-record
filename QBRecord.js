@@ -221,11 +221,11 @@ var QBRecord = (function(){
 			var fid = that.getFid(name),
 				field = that.getField(fid);
 
-			if(!field || fid <= 5 || [
+			if(fid <= 5 || (field && [
 				'summary',
 				'virtual',
 				'lookup'
-			].indexOf(field.mode) !== -1){
+			].indexOf(field.mode) !== -1)){
 				return;
 			}
 
