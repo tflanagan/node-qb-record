@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 0;
-	var VERSION_PATCH = 4;
+	var VERSION_PATCH = 5;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -34,8 +34,8 @@ var QBRecord = (function(){
 			primaryKey: 3
 		},
 
-		recordid: -1,
-		primaryKey: -1
+		recordid: null,
+		primaryKey: null
 	};
 
 	/* QBRecord */
@@ -268,6 +268,48 @@ var QBRecord = (function(){
 		});
 
 		return this;
+	};
+
+	/* Helpers */
+	var indexOfObj = function(obj, key, value){
+		if(typeof(obj) !== 'object'){
+			return -1;
+		}
+
+		var result,
+			i = 0, l = obj.length,
+			o = 0, k = 0;
+
+		for(; i < l; ++i){
+			if(typeof(key) === 'object'){
+				result = new Array(key.length);
+				result = setAll(result, false);
+
+				for(o = 0, k = result.length; o < k; ++o){
+					if(obj[i][key[o]] === value[o]){
+						result[o] = true;
+					}
+				}
+
+				if(result.indexOf(false) === -1){
+					return i;
+				}
+			}else{
+				if(obj[i][key] === value){
+					return i;
+				}
+			}
+		}
+
+		return -1;
+	};
+
+	var setAll = function(arr, value){
+		for(var i = 0; i < arr.length; ++i){
+			arr[i] = value;
+		}
+
+		return arr;
 	};
 
 	/* Expose Version */
