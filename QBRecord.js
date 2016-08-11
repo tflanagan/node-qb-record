@@ -4,8 +4,8 @@ var QBRecord = (function(){
 
 	/* Versioning */
 	var VERSION_MAJOR = 0;
-	var VERSION_MINOR = 0;
-	var VERSION_PATCH = 5;
+	var VERSION_MINOR = 1;
+	var VERSION_PATCH = 0;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -14,6 +14,13 @@ var QBRecord = (function(){
 		$('<script />', {
 			type: 'text/javascript',
 			src: 'https://cdn.datacollaborative.com/js/quickbase/quickbase.browserify.min.js'
+		}).appendTo('head');
+	}
+
+	if(typeof(window.RFC4122) === 'undefined'){
+		$('<script />', {
+			type: 'text/javascript',
+			src: 'https://cdn.datacollaborative.com/js/rfc4122/rfc4122.browserify.min.js'
 		}).appendTo('head');
 	}
 
@@ -55,6 +62,10 @@ var QBRecord = (function(){
 
 				var settings = $.extend(true, {}, defaults, options || {});
 
+				that._rfc4122 = new RFC4122();
+
+				that._id = that._rfc4122.v4();
+
 				that.setDBID(settings.dbid)
 					.setFids(settings.fids)
 					.set('recordid', settings.recordid)
@@ -65,12 +76,13 @@ var QBRecord = (function(){
 				}
 			};
 
-		if(typeof(QuickBase) === 'function'){
+		if(typeof(QuickBase) === 'function' && typeof(RFC4122) === 'function'){
 			init();
 		}else{
 			var nS = setInterval(function(){
 				if([
-					typeof(QuickBase) === 'function'
+					typeof(QuickBase) === 'function',
+					typeof(RFC4122) === 'function'
 				].indexOf(false) !== -1){
 					return false;
 				}
