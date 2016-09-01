@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 1;
-	var VERSION_PATCH = 1;
+	var VERSION_PATCH = 2;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -257,7 +257,30 @@ var QBRecord = (function(){
 		});
 
 		return this._qb.api(action, options).then(function(results){
+			var fids = that.getFids();
+
 			that.set('recordid', results.rid);
+
+			if(fids.primaryKey){
+				var fname = false;
+
+				Object.keys(fids).some(function(fid){
+					if(fid === 'primaryKey'){
+						return false;
+					}else
+					if(fids.primaryKey === fids[fid]){
+						fname = fid;
+
+						return true;
+					}
+
+					return false;
+				});
+
+				if(fname !== false){
+					that.set('primaryKey', that.get(fname));
+				}
+			}
 
 			return that;
 		});
