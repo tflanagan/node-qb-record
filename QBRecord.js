@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 1;
-	var VERSION_PATCH = 2;
+	var VERSION_PATCH = 3;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -257,9 +257,18 @@ var QBRecord = (function(){
 		});
 
 		return this._qb.api(action, options).then(function(results){
-			var fids = that.getFids();
+			var fids = that.getFids(),
+				now = Date.now();
 
 			that.set('recordid', results.rid);
+
+			if(fids.dateCreated && action === 'API_AddRecord'){
+				that.set('dateCreated', now);
+			}
+
+			if(fids.dateModified){
+				that.set('dateModified', now);
+			}
 
 			if(fids.primaryKey){
 				var fname = false;
