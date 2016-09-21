@@ -4,8 +4,8 @@ var QBRecord = (function(){
 
 	/* Versioning */
 	var VERSION_MAJOR = 0;
-	var VERSION_MINOR = 1;
-	var VERSION_PATCH = 3;
+	var VERSION_MINOR = 2;
+	var VERSION_PATCH = 0;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -212,6 +212,18 @@ var QBRecord = (function(){
 			}
 
 			return that;
+		});
+	};
+
+	QBTable.prototype.loadSchema = function(){
+		var that = this;
+
+		return this._qb.api('API_GetSchema', {
+			dbid: this.getDBID()
+		}).then(function(results){
+			that._fields = results.table.fields;
+
+			return that.getFields();
 		});
 	};
 

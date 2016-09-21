@@ -89,6 +89,9 @@ If a record has been loaded, then returns the `fields` object from the DoQuery.
 This method executes an API_DoQuery for the stored Record ID value. Will
 automatically map all values defined in the `fids` object.
 
+#### `.loadSchema()`
+Executes an API_GetSchema and stores the returned results internally.
+
 #### `.save()`
 This method executes either an API_AddRecord or an API_EditRecord depending on
 the set Record ID. If a Record ID is stored, then it executes an API_EditRecord
