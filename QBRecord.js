@@ -215,7 +215,7 @@ var QBRecord = (function(){
 		});
 	};
 
-	QBTable.prototype.loadSchema = function(){
+	QBRecord.prototype.loadSchema = function(){
 		var that = this;
 
 		return this._qb.api('API_GetSchema', {
