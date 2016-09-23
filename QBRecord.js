@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 2;
-	var VERSION_PATCH = 0;
+	var VERSION_PATCH = 1;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -260,6 +260,14 @@ var QBRecord = (function(){
 				null
 			].indexOf(val) !== -1){
 				val = '';
+			}
+
+			if(typeof(val) === 'object' && val.filename){
+				options.fields.push({
+					fid: fid,
+					filename: val.filename,
+					value: val.data
+				});
 			}
 
 			options.fields.push({
