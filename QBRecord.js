@@ -5,7 +5,7 @@ var QBRecord = (function(){
 	/* Versioning */
 	var VERSION_MAJOR = 0;
 	var VERSION_MINOR = 2;
-	var VERSION_PATCH = 1;
+	var VERSION_PATCH = 2;
 
 	/* Dependencies */
 	if(typeof(window.QuickBase) === 'undefined'){
@@ -268,12 +268,12 @@ var QBRecord = (function(){
 					filename: val.filename,
 					value: val.data
 				});
+			}else{
+				options.fields.push({
+					fid: fid,
+					value: val
+				});
 			}
-
-			options.fields.push({
-				fid: fid,
-				value: val
-			});
 		});
 
 		return this._qb.api(action, options).then(function(results){
