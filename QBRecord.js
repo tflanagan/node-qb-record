@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 2;
-const VERSION_PATCH = 0;
+const VERSION_PATCH = 1;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -13,12 +13,12 @@ const QuickBase = require('quickbase');
 /* Default Settings */
 const defaults = {
 	quickbase: {
-		realm: global === window ? global.location.host.split('.')[0] : '',
+		realm: window && global === window ? global.location.host.split('.')[0] : '',
 		appToken: ''
 	},
 
 	dbid: (function(){
-		if(global !== window){
+		if(window && global !== window){
 			return '';
 		}
 
