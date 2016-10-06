@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 1;
-const VERSION_PATCH = 1;
+const VERSION_PATCH = 2;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -39,6 +39,8 @@ const defaults = {
 class QBRecord {
 
 	constructor(options){
+		this.className = QBRecord.className;
+
 		this._data = {};
 		this._dbid = '';
 		this._fids = {};
