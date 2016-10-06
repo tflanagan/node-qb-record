@@ -2,8 +2,8 @@
 
 /* Versioning */
 const VERSION_MAJOR = 1;
-const VERSION_MINOR = 0;
-const VERSION_PATCH = 1;
+const VERSION_MINOR = 1;
+const VERSION_PATCH = 0;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -44,7 +44,7 @@ class QBRecord {
 		this._fids = {};
 		this._fields = [];
 
-		if(options && options.quickbase instanceof QuickBase){
+		if(options && options.quickbase.className && options.quickbase.className === 'QuickBase'){
 			this._qb = options.quickbase;
 
 			delete options.quickbase
@@ -352,6 +352,9 @@ const setAll = function(arr, value){
 
 	return arr;
 };
+
+/* Expose Properties */
+QBRecord.className = 'QBRecord';
 
 /* Expose Version */
 QBRecord.VERSION = [ VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH ].join('.');
