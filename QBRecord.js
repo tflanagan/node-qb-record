@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 2;
-const VERSION_PATCH = 1;
+const VERSION_PATCH = 2;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -13,18 +13,20 @@ const QuickBase = require('quickbase');
 /* Default Settings */
 const defaults = {
 	quickbase: {
-		realm: window && global === window ? global.location.host.split('.')[0] : '',
+		realm: typeof global !== 'undefined' && typeof window !== 'undefined' && global === window ? global.location.host.split('.')[0] : '',
 		appToken: ''
 	},
 
 	dbid: (function(){
-		if(window && global !== window){
-			return '';
+		if(typeof global !== 'undefined' && typeof window !== 'undefined' && global === window){
+			var dbid = global.location.pathname.match(/^\/db\/(?!main)(.*)$/);
+
+			if(dbid){
+				return dbid[1];
+			}
 		}
 
-		var dbid = global.location.pathname.match(/^\/db\/(?!main)(.*)$/);
-
-		return dbid ? dbid[1] : '';
+		return '';
 	})(),
 	fids: {
 		recordid: 3,
