@@ -94,10 +94,15 @@ automatically map all values defined in the `fids` object.
 #### `.loadSchema()`
 Executes an API_GetSchema and stores the returned results internally.
 
-#### `.save()`
+#### `.save(fidsToSave)`
+ - `fidsToSave`: array, defaults to undefined
+
 This method executes either an API_AddRecord or an API_EditRecord depending on
 the set Record ID. If a Record ID is stored, then it executes an API_EditRecord
 otherwise, an API_AddRecord.
+
+If `fidsToSave` is defined, then only configured fids in this array will be
+saved.
 
 If this executes an API_AddRecord, the newly assigned Record ID is
 automatically stored internally. If the defined primaryKey FID is also a

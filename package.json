@@ -42,7 +42,7 @@
     "build": "gulp build"
   },
   "dependencies": {
-    "quickbase": "^2.8.0",
+    "quickbase": "^2.8.1",
     "rfc4122": "^1.0.5",
     "lodash.merge": "^4.3.4"
   },
