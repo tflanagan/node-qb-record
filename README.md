@@ -1,6 +1,8 @@
 # QBRecord
 ========
 
+A lightweight abstraction layer for QuickBase
+
 ### Initialization
 --------------
 
