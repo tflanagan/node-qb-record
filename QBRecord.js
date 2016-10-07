@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 2;
-const VERSION_PATCH = 2;
+const VERSION_PATCH = 3;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -219,7 +219,7 @@ class QBRecord {
 				'summary',
 				'virtual',
 				'lookup'
-			].indexOf(field.mode) !== -1) || (fidsToSave && (fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1))){
+			].indexOf(field.mode) !== -1) || (fidsToSave && fidsToSave.indexOf(fid) === -1 && fidsToSave.indexOf(name) === -1)){
 				return;
 			}
 
