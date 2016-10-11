@@ -1,7 +1,7 @@
 {
   "name": "qb-record",
   "private": true,
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "A lightweight abstraction layer for QuickBase",
   "keywords": [
     "QuickBase",
@@ -33,7 +33,7 @@
   "contributors": [
     "Tristian Flanagan <tflanagan@datacollaborative.com> (https://gitlab.datacollaborative.com/u/tflanagan)"
   ],
-  "main": "QBrecord.js",
+  "main": "QBRecord.js",
   "repository": {
     "type": "git",
     "url": "git@gitlab.datacollaborative.com:products/qb-record.git"
