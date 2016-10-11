@@ -1,7 +1,7 @@
 {
   "name": "qb-record",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A lightweight abstraction layer for QuickBase",
   "keywords": [
     "QuickBase",
@@ -42,8 +42,8 @@
     "build": "gulp build"
   },
   "dependencies": {
-    "quickbase": "^2.8.1",
-    "rfc4122": "^1.0.5",
+    "quickbase": "*",
+    "rfc4122": "*",
     "lodash.merge": "^4.3.4"
   },
   "devDependencies": {
