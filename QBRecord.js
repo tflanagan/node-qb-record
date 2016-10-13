@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 2;
-const VERSION_PATCH = 5;
+const VERSION_PATCH = 6;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -215,11 +215,14 @@ class QBRecord {
 			const fid = this.getFid(name);
 			const field = this.getField(fid);
 
-			if(fid <= 5 || (field && [
+			if(fid <= 5 || (field && ([
 				'summary',
 				'virtual',
 				'lookup'
-			].indexOf(field.mode) !== -1) || (fidsToSave && fidsToSave.indexOf(fid) === -1 && fidsToSave.indexOf(name) === -1)){
+			].indexOf(field.mode) !== -1 || [
+				'ICalendarButton',
+				'vCardButton'
+			].indexOf(field.field_type) !== -1)) || (fidsToSave && fidsToSave.indexOf(fid) === -1 && fidsToSave.indexOf(name) === -1)){
 				return;
 			}
 
