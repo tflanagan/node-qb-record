@@ -2,8 +2,8 @@
 
 /* Versioning */
 const VERSION_MAJOR = 1;
-const VERSION_MINOR = 2;
-const VERSION_PATCH = 7;
+const VERSION_MINOR = 3;
+const VERSION_PATCH = 0;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -47,6 +47,7 @@ class QBRecord {
 		this._dbid = '';
 		this._fids = {};
 		this._fields = [];
+		this._meta = {};
 
 		if(options && options.quickbase.className && options.quickbase.className === 'QuickBase'){
 			this._qb = options.quickbase;
@@ -153,6 +154,10 @@ class QBRecord {
 		return this._fields;
 	};
 
+	getTableName(){
+		return this._meta.name;
+	};
+
 	load(localQuery){
 		const fids = this.getFids();
 		const rid = this.get('recordid');
@@ -176,6 +181,11 @@ class QBRecord {
 			}),
 			options: 'num-1'
 		}).then((results) => {
+			this._meta = merge({
+				name: results.table.name,
+				desc: results.table.desc,
+			}, results.table.original);
+
 			this._fields = results.table.fields;
 
 			if(results.table.records.length === 0){
@@ -203,6 +213,11 @@ class QBRecord {
 		return this._qb.api('API_GetSchema', {
 			dbid: this.getDBID()
 		}).then((results) => {
+			this._meta = merge({
+				name: results.table.name,
+				desc: results.table.desc,
+			}, results.table.original);
+
 			this._fields = results.table.fields;
 
 			return this.getFields();

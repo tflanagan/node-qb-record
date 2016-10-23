@@ -85,6 +85,9 @@ If a record has been loaded, then returns the field object from the DoQuery with
 #### `.getFields()`
 If a record has been loaded, then returns the `fields` object from the DoQuery.
 
+#### `.getTableName()`
+If a record has been loaded, returns the table name.
+
 #### `.load(localQuery)`
  - `localQuery`: string
 
