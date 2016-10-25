@@ -88,8 +88,9 @@ If a record has been loaded, then returns the `fields` object from the DoQuery.
 #### `.getTableName()`
 If a record has been loaded, returns the table name.
 
-#### `.load(localQuery)`
+#### `.load(localQuery, localClist)`
  - `localQuery`: string
+ - `localClist`: string
 
 This method executes an API_DoQuery for the stored Record ID value. Will
 automatically map all values defined in the `fids` object.

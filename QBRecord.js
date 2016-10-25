@@ -2,8 +2,8 @@
 
 /* Versioning */
 const VERSION_MAJOR = 1;
-const VERSION_MINOR = 3;
-const VERSION_PATCH = 1;
+const VERSION_MINOR = 4;
+const VERSION_PATCH = 0;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -158,7 +158,12 @@ class QBRecord {
 		return this._meta.name;
 	};
 
-	load(localQuery){
+	load(localQuery, localClist){
+		if(typeof(localQuery) === 'object'){
+			localClist = localQuery.clist;
+			localQuery = localQuery.query;
+		}
+
 		const fids = this.getFids();
 		const rid = this.get('recordid');
 		let query = [].concat(localQuery || []);
@@ -173,10 +178,14 @@ class QBRecord {
 			}
 		}
 
+		if(localClist && localClist.join){
+			localClist = localClist.join('.');
+		}
+
 		return this._qb.api('API_DoQuery', {
 			dbid: this._dbid,
 			query: query.join('AND'),
-			clist: Object.keys(fids).map((fid) => {
+			clist: localClist || Object.keys(fids).map((fid) => {
 				return fids[fid];
 			}),
 			options: 'num-1'
@@ -189,7 +198,7 @@ class QBRecord {
 			this._fields = results.table.fields;
 
 			if(results.table.records.length === 0){
-				var err = new Error('Record not found');
+				const err = new Error('Record not found');
 				err.code = 101;
 
 				throw err;
@@ -197,9 +206,17 @@ class QBRecord {
 
 			const record = results.table.records[0];
 
-			Object.keys(fids).forEach((name) => {
-				this.set(name, record[fids[name]]);
-			});
+			if(localClist){
+				localClist.split('.').forEach((id) => {
+					const name = this.getFid(+id, true);
+
+					this.set(name, record[id]);
+				});
+			}else{
+				Object.keys(fids).forEach((name) => {
+					this.set(name, record[fids[name]]);
+				});
+			}
 
 			if(record.hasOwnProperty('rid')){
 				this.set('recordid', record.rid);
