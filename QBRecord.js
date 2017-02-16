@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 4;
-const VERSION_PATCH = 2;
+const VERSION_PATCH = 3;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -258,7 +258,7 @@ class QBRecord {
 			const fid = this.getFid(name);
 			const field = this.getField(fid);
 
-			if(!field.hasOwnProperty('snapfid') && fid <= 5 || (field && ([
+			if(field.hasOwnProperty('snapfid') || fid <= 5 || (field && ([
 				'summary',
 				'virtual',
 				'lookup'
