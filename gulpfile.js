@@ -9,7 +9,7 @@ const Promise = require('bluebird');
 /* Constants */
 const BABEL = join('.', 'node_modules', 'babel-cli', 'bin', 'babel.js');
 const BROWSERIFY = join('.', 'node_modules', 'browserify', 'bin', 'cmd.js');
-const MINIFY = join('.', 'node_modules', 'minify', 'bin', 'minify.js');
+const MINIFY = join('.', 'node_modules', 'minify', 'legacy', 'bin', 'minify.js');
 
 const SRC_FILE = join('.', 'QBRecord.js');
 const ES5_FILE = join('.', 'QBRecord.es5.js');

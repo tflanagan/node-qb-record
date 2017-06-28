@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 4;
-const VERSION_PATCH = 5;
+const VERSION_PATCH = 7;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -243,6 +243,8 @@ class QBRecord {
 
 	save(fidsToSave){
 		const rid = this.get('recordid');
+		const key = this.get('primaryKey');
+
 		let action = 'API_AddRecord',
 			options = {
 				dbid: this._dbid,
@@ -251,7 +253,12 @@ class QBRecord {
 
 		if(rid){
 			action = 'API_EditRecord';
-			options.rid = rid;
+
+			if(this.getFid('recordid') !== this.getFid('primaryKey')){
+				options.key = key;
+			}else{
+				options.rid = rid;
+			}
 		}
 
 		Object.keys(this.getFids()).forEach((name) => {
