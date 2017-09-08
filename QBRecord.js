@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 4;
-const VERSION_PATCH = 7;
+const VERSION_PATCH = 8;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -195,7 +195,15 @@ class QBRecord {
 				desc: results.table.desc,
 			}, results.table.original);
 
-			this._fields = results.table.fields;
+			results.table.fields.forEach((field) => {
+				const i = indexOfObj(this._fields, 'id', field.id);
+
+				if(i === -1){
+					this._fields.push(field);
+				}else{
+					this._fields[i] = field;
+				}
+			});
 
 			if(results.table.records.length === 0){
 				const err = new Error('Record not found');
@@ -235,7 +243,15 @@ class QBRecord {
 				desc: results.table.desc,
 			}, results.table.original);
 
-			this._fields = results.table.fields;
+			results.table.fields.forEach((field) => {
+				const i = indexOfObj(this._fields, 'id', field.id);
+
+				if(i === -1){
+					this._fields.push(field);
+				}else{
+					this._fields[i] = field;
+				}
+			});
 
 			return this.getFields();
 		});
