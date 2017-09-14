@@ -1,7 +1,7 @@
 {
   "name": "qb-record",
   "private": true,
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "A lightweight abstraction layer for QuickBase",
   "keywords": [
     "QuickBase",
@@ -12,31 +12,31 @@
     "qbrecord",
     "qb-record"
   ],
-  "homepage": "https://gitlab.datacollaborative.com/products/qb-record",
+  "homepage": "https://github.com/tflanagan/node-qb-record",
   "bugs": {
-    "url": "https://gitlab.datacollaborative.com/products/qb-record/issues",
-    "email": "tflanagan@datacollaborative.com"
+    "url": "https://github.com/tflanagan/node-qb-record/issues",
+    "email": "contact@tristianflanagan.com"
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "author": {
     "name": "Tristian Flanagan",
-    "url": "https://gitlab.datacollaborative.com/u/tflanagan",
-    "email": "tflanagan@datacollaborative.com"
+    "url": "https://github.com/tflanagan",
+    "email": "contact@tristianflanagan.com"
   },
   "maintainers": [
     {
-      "name": "tflanagan",
-      "url": "https://gitlab.datacollaborative.com/u/tflanagan",
-      "email": "tflanagan@datacollaborative.com"
+      "name": "Tristian Flanagan",
+      "url": "https://github.com/tflanagan",
+      "email": "contact@tristianflanagan.com"
     }
   ],
   "contributors": [
-    "Tristian Flanagan <tflanagan@datacollaborative.com> (https://gitlab.datacollaborative.com/u/tflanagan)"
+    "Tristian Flanagan <contact@tristianflanagan.com> (https://github.com/tflanagan)"
   ],
   "main": "QBRecord.js",
   "repository": {
     "type": "git",
-    "url": "git@gitlab.datacollaborative.com:products/qb-record.git"
+    "url": "git@github.com:tflanagan/node-qb-record.git"
   },
   "scripts": {
     "build": "gulp build"
@@ -58,5 +58,5 @@
   "engines": {
     "node": ">=4.0.*"
   },
-  "git": "git@gitlab.datacollaborative.com:products/qb-record.git"
+  "git": "git@github.com:tflanagan/node-qb-record.git"
 }

@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 4;
-const VERSION_PATCH = 8;
+const VERSION_PATCH = 9;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -75,6 +75,8 @@ class QBRecord {
 
 	clear(){
 		this._data = {};
+		this._fields = [];
+		this._meta = {};
 
 		return this;
 	};
