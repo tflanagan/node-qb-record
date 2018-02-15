@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 4;
-const VERSION_PATCH = 10;
+const VERSION_PATCH = 11;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -217,7 +217,7 @@ class QBRecord {
 			const record = results.table.records[0];
 
 			if(localClist){
-				localClist.split('.').forEach((id) => {
+				('' + localClist).split('.').forEach((id) => {
 					const name = this.getFid(+id, true);
 
 					this.set(name, record[id]);
