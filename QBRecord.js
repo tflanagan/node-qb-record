@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 4;
-const VERSION_PATCH = 13;
+const VERSION_PATCH = 14;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -304,7 +304,7 @@ class QBRecord {
 			}
 
 			if((field && field.field_type === 'file') || (typeof(val) === 'object' && val.filename)){
-				if(val){
+				if(val && val.data){
 					options.fields.push({
 						fid: fid,
 						filename: val.filename,
