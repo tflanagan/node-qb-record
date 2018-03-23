@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 4;
-const VERSION_PATCH = 11;
+const VERSION_PATCH = 12;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -303,11 +303,20 @@ class QBRecord {
 				val = '';
 			}
 
-			if(typeof(val) === 'object' && val.filename){
+			if((field && field.field_type === 'file') || (typeof(val) === 'object' && val.filename)){
 				options.fields.push({
 					fid: fid,
 					filename: val.filename,
 					value: val.data
+				});
+			}else
+			if((field && [
+				'multitext',
+				'multiuserid'
+			].indexOf(field.field_type) !== -1) || val instanceof Array){
+				options.fields.push({
+					fid: fid,
+					value: val instanceof Array ? val.join(';') : val
 				});
 			}else{
 				options.fields.push({
