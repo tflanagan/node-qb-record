@@ -2,8 +2,8 @@
 
 /* Versioning */
 const VERSION_MAJOR = 1;
-const VERSION_MINOR = 4;
-const VERSION_PATCH = 15;
+const VERSION_MINOR = 5;
+const VERSION_PATCH = 0;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -391,6 +391,25 @@ class QBRecord {
 		});
 
 		return this;
+	};
+
+	toJson(fidsToConvert){
+		var arr = {};
+
+		Object.keys(this._data).forEach((name) => {
+			if(!fidsToConvert || fidsToConvert.length === 0 || fidsToConvert.indexOf(name) !== -1){
+				if((typeof(jQuery) !== 'undefined' && this._data[name] instanceof jQuery) || (typeof(HTMLElement) !== 'undefined' && this._data[name] instanceof HTMLElement)){
+					arr[name] = '[DOM Object]';
+				}else
+				if(this._data[name] instanceof Object && !(this._data[name] instanceof Array)){
+					arr[name] = merge({}, this._data[name]);
+				}else{
+					arr[name] = this._data[name];
+				}
+			}
+		});
+
+		return arr;
 	};
 
 }
