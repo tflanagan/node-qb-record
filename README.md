@@ -163,3 +163,8 @@ record.setFids([
 	{ name: 'total', id: 7 }
 ]);
 ```
+
+#### `.toJson(fidsToConvert)`
+ - `fidsToConvert`: array, optional
+
+ returns the record as a JSON object

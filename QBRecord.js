@@ -394,22 +394,29 @@ class QBRecord {
 	};
 
 	toJson(fidsToConvert){
-		var arr = {};
+		const convert = (obj, isFirstLevel) => {
+			var arr = {};
 
-		Object.keys(this._data).forEach((name) => {
-			if(!fidsToConvert || fidsToConvert.length === 0 || fidsToConvert.indexOf(name) !== -1){
-				if((typeof(jQuery) !== 'undefined' && this._data[name] instanceof jQuery) || (typeof(HTMLElement) !== 'undefined' && this._data[name] instanceof HTMLElement)){
-					arr[name] = '[DOM Object]';
-				}else
-				if(this._data[name] instanceof Object && !(this._data[name] instanceof Array)){
-					arr[name] = merge({}, this._data[name]);
-				}else{
-					arr[name] = this._data[name];
+			Object.keys(obj).forEach((name) => {
+				if(!isFirstLevel || !fidsToConvert || fidsToConvert.length === 0 || fidsToConvert.indexOf(name) !== -1){
+					if((typeof(jQuery) !== 'undefined' && obj[name] instanceof jQuery) || (typeof(HTMLElement) !== 'undefined' && obj[name] instanceof HTMLElement)){
+						arr[name] = '[DOM Object]';
+					}else
+					if(obj[name] instanceof QBRecord || (typeof(QBTable) !== 'undefined' && obj[name] instanceof QBTable)){
+						arr[name] = obj[name].toJson();
+					}else
+					if(obj[name] instanceof Object && !(obj[name] instanceof Array)){
+						arr[name] = convert(obj[name]);
+					}else{
+						arr[name] = obj[name];
+					}
 				}
-			}
-		});
+			});
 
-		return arr;
+			return arr;
+		};		
+
+		return convert(this._data, true);
 	};
 
 }
