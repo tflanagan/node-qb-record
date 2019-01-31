@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 5;
-const VERSION_PATCH = 0;
+const VERSION_PATCH = 2;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -394,22 +394,30 @@ class QBRecord {
 	};
 
 	toJson(fidsToConvert){
+		var handleVal = function(val){
+			if((typeof(jQuery) !== 'undefined' && val instanceof jQuery) || (typeof(HTMLElement) !== 'undefined' && val instanceof HTMLElement)){
+				return '[DOM Object]';
+			}else
+			if(val instanceof QBRecord || (typeof(QBTable) !== 'undefined' && val instanceof QBTable)){
+				return val.toJson();
+			}else
+			if(val instanceof Object){
+				return convert(val);
+			}else{
+				return val;
+			}
+		};
+
 		const convert = (obj, isFirstLevel) => {
-			var arr = {};
+			if(obj instanceof Array){
+				return obj.map(handleVal);
+			}
+
+			const arr = {};
 
 			Object.keys(obj).forEach((name) => {
 				if(!isFirstLevel || !fidsToConvert || fidsToConvert.length === 0 || fidsToConvert.indexOf(name) !== -1){
-					if((typeof(jQuery) !== 'undefined' && obj[name] instanceof jQuery) || (typeof(HTMLElement) !== 'undefined' && obj[name] instanceof HTMLElement)){
-						arr[name] = '[DOM Object]';
-					}else
-					if(obj[name] instanceof QBRecord || (typeof(QBTable) !== 'undefined' && obj[name] instanceof QBTable)){
-						arr[name] = obj[name].toJson();
-					}else
-					if(obj[name] instanceof Object && !(obj[name] instanceof Array)){
-						arr[name] = convert(obj[name]);
-					}else{
-						arr[name] = obj[name];
-					}
+					arr[name] = handleVal(obj[name]);
 				}
 			});
 
