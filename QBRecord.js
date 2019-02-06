@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 5;
-const VERSION_PATCH = 2;
+const VERSION_PATCH = 3;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -400,6 +400,12 @@ class QBRecord {
 			}else
 			if(val instanceof QBRecord || (typeof(QBTable) !== 'undefined' && val instanceof QBTable)){
 				return val.toJson();
+			}else
+			if((typeof(moment) !== 'undefined' && moment.isMoment(val)) || val instanceof Date){
+				return val.toISOString();
+			}else
+			if(typeof(moment) !== 'undefined' && moment.isDuration(val)){
+				return val.asMilliseconds();
 			}else
 			if(val instanceof Object){
 				return convert(val);
