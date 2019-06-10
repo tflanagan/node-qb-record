@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 1;
 const VERSION_MINOR = 5;
-const VERSION_PATCH = 3;
+const VERSION_PATCH = 4;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -259,7 +259,7 @@ class QBRecord {
 		});
 	};
 
-	save(fidsToSave){
+	save(fidsToSave, reqHook){
 		const rid = this.get('recordid');
 		const key = this.get('primaryKey');
 
@@ -328,7 +328,7 @@ class QBRecord {
 			}
 		});
 
-		return this._qb.api(action, options).then((results) => {
+		return this._qb.api(action, options, null, reqHook).then((results) => {
 			const fids = this.getFids();
 			const now = Date.now();
 
