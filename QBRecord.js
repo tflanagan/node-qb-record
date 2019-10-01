@@ -1,13 +1,14 @@
 'use strict';
 
 /* Versioning */
-const VERSION_MAJOR = 1;
-const VERSION_MINOR = 5;
-const VERSION_PATCH = 8;
+const VERSION_MAJOR = 2;
+const VERSION_MINOR = 0;
+const VERSION_PATCH = 0;
 
 /* Dependencies */
 const merge = require('lodash.merge');
 const RFC4122 = require('rfc4122');
+const QBField = require('qb-field');
 const QuickBase = require('quickbase');
 
 /* Default Settings */
@@ -143,13 +144,16 @@ class QBRecord {
 
 	getField(id){
 		const fields = this.getFields();
-		const i = indexOfObj(fields, 'id', +id);
 
-		if(i === -1){
-			return undefined;
+		let i = 0, result = undefined;
+
+		for(; result === undefined && i < fields.length; ++i){
+			if(fields[i].getFid() === id){
+				result = fields[i];
+			}
 		}
 
-		return fields[i];
+		return result;
 	};
 
 	getFields(){
@@ -198,13 +202,29 @@ class QBRecord {
 			}, results.table.original);
 
 			results.table.fields.forEach((field) => {
-				const i = indexOfObj(this._fields, 'id', field.id);
+				const fid = +field.id;
 
-				if(i === -1){
-					this._fields.push(field);
-				}else{
-					this._fields[i] = field;
+				let result = undefined;
+
+				for(let i = 0; result === undefined && i < this._fields.length; ++i){
+					if(this._fields[i].getFid() === fid){
+						result = this._fields[i];
+					}
 				}
+
+				if(!result){
+					result = new QBField({
+						quickbase: this._qb,
+						dbid: this.getDBID(),
+						fid: fid
+					});
+
+					this._fields.push(result);
+				}
+
+				Object.keys(field).forEach((attribute) => {
+					result.set(attribute, field[attribute]);
+				});
 			});
 
 			if(results.table.records.length === 0){
@@ -246,13 +266,29 @@ class QBRecord {
 			}, results.table.original);
 
 			results.table.fields.forEach((field) => {
-				const i = indexOfObj(this._fields, 'id', field.id);
+				const fid = +field.id;
 
-				if(i === -1){
-					this._fields.push(field);
-				}else{
-					this._fields[i] = field;
+				let result = undefined;
+
+				for(let i = 0; result === undefined && i < this._fields.length; ++i){
+					if(this._fields[i].getFid() === fid){
+						result = this._fields[i];
+					}
 				}
+
+				if(!result){
+					result = new QBField({
+						quickbase: this._qb,
+						dbid: this.getDBID(),
+						fid: fid
+					});
+
+					this._fields.push(result);
+				}
+
+				Object.keys(field).forEach((attribute) => {
+					result.set(attribute, field[attribute]);
+				});
 			});
 
 			return this.getFields();
@@ -437,47 +473,6 @@ class QBRecord {
 
 /* Expose Properties */
 QBRecord.defaults = defaults;
-
-/* Helpers */
-const indexOfObj = function(obj, key, value){
-	if(typeof(obj) !== 'object'){
-		return -1;
-	}
-
-	let result,  i = 0, o = 0, k = 0;
-	const l = obj.length;
-
-	for(; i < l; ++i){
-		if(typeof(key) === 'object'){
-			result = new Array(key.length);
-			result = setAll(result, false);
-
-			for(o = 0, k = result.length; o < k; ++o){
-				if(obj[i][key[o]] === value[o]){
-					result[o] = true;
-				}
-			}
-
-			if(result.indexOf(false) === -1){
-				return i;
-			}
-		}else{
-			if(obj[i][key] === value){
-				return i;
-			}
-		}
-	}
-
-	return -1;
-};
-
-const setAll = function(arr, value){
-	for(let i = 0; i < arr.length; ++i){
-		arr[i] = value;
-	}
-
-	return arr;
-};
 
 /* Expose Properties */
 QBRecord.className = 'QBRecord';
