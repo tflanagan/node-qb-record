@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 0;
+const VERSION_PATCH = 1;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -323,10 +323,10 @@ class QBRecord {
 				'summary',
 				'virtual',
 				'lookup'
-			].indexOf(field.mode) !== -1 || field.hasOwnProperty('snapfid') || [
+			].indexOf(field.get('mode')) !== -1 || field.get('snapfid') || [
 				'ICalendarButton',
 				'vCardButton'
-			].indexOf(field.field_type) !== -1)) || (fidsToSave && fidsToSave.indexOf(fid) === -1 && fidsToSave.indexOf(name) === -1)){
+			].indexOf(field.get('field_type')) !== -1)) || (fidsToSave && fidsToSave.indexOf(fid) === -1 && fidsToSave.indexOf(name) === -1)){
 				return;
 			}
 
@@ -339,7 +339,7 @@ class QBRecord {
 				val = '';
 			}
 
-			if((field && field.field_type === 'file') || (typeof(val) === 'object' && val.filename)){
+			if((field && field.get('field_type') === 'file') || (typeof(val) === 'object' && val.filename)){
 				if(val && val.data){
 					options.fields.push({
 						fid: fid,
@@ -351,7 +351,7 @@ class QBRecord {
 			if((field && [
 				'multitext',
 				'multiuserid'
-			].indexOf(field.field_type) !== -1) || val instanceof Array){
+			].indexOf(field.get('field_type')) !== -1) || val instanceof Array){
 				options.fields.push({
 					fid: fid,
 					value: val instanceof Array ? val.join(';') : val
@@ -366,16 +366,15 @@ class QBRecord {
 
 		return this._qb.api(action, options, null, reqHook).then((results) => {
 			const fids = this.getFids();
-			const now = Date.now();
 
 			this.set('recordid', results.rid);
 
 			if(fids.dateCreated && action === 'API_AddRecord'){
-				this.set('dateCreated', now);
+				this.set('dateCreated', results.update_id);
 			}
 
 			if(fids.dateModified){
-				this.set('dateModified', now);
+				this.set('dateModified', results.update_id);
 			}
 
 			if(fids.primaryKey){
