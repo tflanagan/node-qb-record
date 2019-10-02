@@ -3,7 +3,6 @@
 /* Dependencies */
 const exec = require('child_process').exec;
 const join = require('path').join;
-const Promise = require('bluebird');
 
 /* Constants */
 const BABEL = join('.', 'node_modules', 'babel-cli', 'bin', 'babel.js');

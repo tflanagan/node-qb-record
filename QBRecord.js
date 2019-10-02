@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 1;
+const VERSION_PATCH = 2;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -239,12 +239,28 @@ class QBRecord {
 			if(localClist){
 				('' + localClist).split('.').forEach((id) => {
 					const name = this.getFid(+id, true);
+					const field = this.getField(+id);
 
-					this.set(name, record[id]);
+					let value = record[id];
+
+					if(field){
+						value = QBField.ParseValue(field, value);
+					}
+
+					this.set(name, value);
 				});
 			}else{
 				Object.keys(fids).forEach((name) => {
-					this.set(name, record[fids[name]]);
+					const fid = +fids[name];
+					const field = this.getField(fid);
+
+					let value = record[fid];
+
+					if(field){
+						value = QBField.ParseValue(field, value);
+					}
+
+					this.set(name, value);
 				});
 			}
 
@@ -347,16 +363,9 @@ class QBRecord {
 						value: val.data
 					});
 				}
-			}else
-			if((field && [
-				'multitext',
-				'multiuserid'
-			].indexOf(field.get('field_type')) !== -1) || val instanceof Array){
-				options.fields.push({
-					fid: fid,
-					value: val instanceof Array ? val.join(';') : val
-				});
 			}else{
+				val = QBField.FormatValue(field, val);
+
 				options.fields.push({
 					fid: fid,
 					value: val

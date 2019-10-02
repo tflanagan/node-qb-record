@@ -1,7 +1,7 @@
 {
   "name": "qb-record",
   "private": false,
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A lightweight abstraction layer for QuickBase",
   "keywords": [
     "QuickBase",
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "lodash.merge": "^4.6.2",
-    "qb-field": "^0.1.0",
+    "qb-field": "^0.2.2",
     "quickbase": "^2.11.0",
     "rfc4122": "^1.0.5"
   },
