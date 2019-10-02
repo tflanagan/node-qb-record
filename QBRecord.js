@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 2;
+const VERSION_PATCH = 3;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -364,7 +364,9 @@ class QBRecord {
 					});
 				}
 			}else{
-				val = QBField.FormatValue(field, val);
+				if(field){
+					val = QBField.FormatValue(field, val);
+				}
 
 				options.fields.push({
 					fid: fid,
