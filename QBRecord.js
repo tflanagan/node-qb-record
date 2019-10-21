@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 8;
+const VERSION_PATCH = 9;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -322,7 +322,7 @@ class QBRecord {
 				fields: []
 			};
 
-		if(rid){
+		if(rid || key){
 			action = 'API_EditRecord';
 
 			if(this.getFid('recordid') !== this.getFid('primaryKey')){
