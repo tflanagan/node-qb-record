@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 12;
+const VERSION_PATCH = 13;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -336,7 +336,9 @@ class QBRecord {
 			}
 		}
 
-		Object.keys(this.getFids()).filter((fidName, i, fids) => {
+		const fids = this.getFids();
+
+		Object.keys(fids).filter((fidName) => {
 			return typeof(fids[fidName]) !== 'object';
 		}).forEach((name) => {
 			const fid = this.getFid(name);
