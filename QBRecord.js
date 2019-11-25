@@ -171,9 +171,7 @@ class QBRecord {
 			localQuery = localQuery.query;
 		}
 
-		const fids = this.getFids().filter((fidName, i, fids) => {
-			return typeof(fids[fidName]) !== 'object';
-		});
+		const fids = this.getFids();
 		const rid = this.get('recordid');
 		let query = [].concat(localQuery || []);
 
@@ -194,7 +192,9 @@ class QBRecord {
 		return this._qb.api('API_DoQuery', {
 			dbid: this._dbid,
 			query: query.join('AND'),
-			clist: localClist || Object.keys(fids).map((fidName) => {
+			clist: localClist || Object.keys(fids).filter((fidName) => {
+				return typeof(fids[fidName]) !== 'object';
+			}).map((fidName) => {
 				return fids[fidName];
 			}),
 			options: 'num-1'
@@ -253,7 +253,9 @@ class QBRecord {
 					this.set(name, value);
 				});
 			}else{
-				Object.keys(fids).forEach((name) => {
+				Object.keys(fids).filter((fidName) => {
+					return typeof(fids[fidName]) !== 'object';
+				}).forEach((name) => {
 					const fid = +fids[name];
 					const field = this.getField(fid);
 
@@ -381,9 +383,7 @@ class QBRecord {
 		});
 
 		return this._qb.api(action, options, null, reqHook).then((results) => {
-			const fids = this.getFids().filter((fidName, i, fids) => {
-				return typeof(fids[fidName]) !== 'object';
-			});
+			const fids = this.getFids();
 
 			this.set('recordid', results.rid);
 
@@ -398,7 +398,9 @@ class QBRecord {
 			if(fids.primaryKey){
 				let fname = false;
 
-				Object.keys(fids).some((fid) => {
+				Object.keys(fids).filter((fidName) => {
+					return typeof(fids[fidName]) !== 'object';
+				}).some((fid) => {
 					if(fid === 'primaryKey'){
 						return false;
 					}else
