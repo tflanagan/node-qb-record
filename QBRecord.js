@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 10;
+const VERSION_PATCH = 11;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -171,7 +171,9 @@ class QBRecord {
 			localQuery = localQuery.query;
 		}
 
-		const fids = this.getFids();
+		const fids = this.getFids().filter((fidName) => {
+			return typeof(fids[fidName]) !== 'object';
+		});
 		const rid = this.get('recordid');
 		let query = [].concat(localQuery || []);
 
@@ -192,8 +194,8 @@ class QBRecord {
 		return this._qb.api('API_DoQuery', {
 			dbid: this._dbid,
 			query: query.join('AND'),
-			clist: localClist || Object.keys(fids).map((fid) => {
-				return fids[fid];
+			clist: localClist || Object.keys(fids).map((fidName) => {
+				return fids[fidName];
 			}),
 			options: 'num-1'
 		}).then((results) => {
@@ -332,7 +334,9 @@ class QBRecord {
 			}
 		}
 
-		Object.keys(this.getFids()).forEach((name) => {
+		Object.keys(this.getFids()).filter((fidName) => {
+			return typeof(fids[fidName]) !== 'object';
+		}).forEach((name) => {
 			const fid = this.getFid(name);
 			const field = this.getField(fid);
 
@@ -377,7 +381,9 @@ class QBRecord {
 		});
 
 		return this._qb.api(action, options, null, reqHook).then((results) => {
-			const fids = this.getFids();
+			const fids = this.getFids().filter((fidName) => {
+				return typeof(fids[fidName]) !== 'object';
+			});
 
 			this.set('recordid', results.rid);
 
@@ -427,7 +433,15 @@ class QBRecord {
 	};
 
 	setFid(name, id){
-		this._fids[name] = +id;
+		if(typeof(id) === 'object'){
+			this._fids[name] = id;
+
+			Object.keys(id).forEach((key, i) => {
+				this._fids[('' + name) + (i + 1)] = +id[key];
+			});
+		}else{
+			this._fids[name] = +id;
+		}
 
 		return this;
 	};
