@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 11;
+const VERSION_PATCH = 12;
 
 /* Dependencies */
 const merge = require('lodash.merge');
@@ -171,7 +171,7 @@ class QBRecord {
 			localQuery = localQuery.query;
 		}
 
-		const fids = this.getFids().filter((fidName) => {
+		const fids = this.getFids().filter((fidName, i, fids) => {
 			return typeof(fids[fidName]) !== 'object';
 		});
 		const rid = this.get('recordid');
@@ -334,7 +334,7 @@ class QBRecord {
 			}
 		}
 
-		Object.keys(this.getFids()).filter((fidName) => {
+		Object.keys(this.getFids()).filter((fidName, i, fids) => {
 			return typeof(fids[fidName]) !== 'object';
 		}).forEach((name) => {
 			const fid = this.getFid(name);
@@ -381,7 +381,7 @@ class QBRecord {
 		});
 
 		return this._qb.api(action, options, null, reqHook).then((results) => {
-			const fids = this.getFids().filter((fidName) => {
+			const fids = this.getFids().filter((fidName, i, fids) => {
 				return typeof(fids[fidName]) !== 'object';
 			});
 
