@@ -1,0 +1,4 @@
+*
+!.gitignore
+!.npmignore
+!qb-record.browserify.min.js

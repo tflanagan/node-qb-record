@@ -1,0 +1,8 @@
+docs/
+src/
+bower.json
+build.js
+tsconfig.json
+ava.config.js
+.env
+.env.example

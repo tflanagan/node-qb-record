@@ -1,11 +1,13 @@
 {
   "name": "qb-record",
   "private": false,
-  "version": "2.0.15",
-  "description": "A lightweight abstraction layer for QuickBase",
+  "version": "3.0.0-alpha.0",
+  "description": "A lightweight abstraction layer for Quick Base",
   "keywords": [
     "QuickBase",
     "quickbase",
+    "Quick Base",
+    "quick base",
     "qb",
     "api",
     "QBrecord",
@@ -33,30 +35,39 @@
   "contributors": [
     "Tristian Flanagan <contact@tristianflanagan.com> (https://github.com/tflanagan)"
   ],
-  "main": "QBRecord.js",
+  "main": "./dist/qb-record.js",
+  "types": "./dist/qb-record.d.ts",
   "repository": {
     "type": "git",
     "url": "git@github.com:tflanagan/node-qb-record.git"
   },
   "scripts": {
-    "build": "node build.js"
+    "cleanup": "rm -rf ./dist/*",
+    "reinstall": "rm -rf node_modules/ && npm install",
+    "reinstall-dev": "rm -rf node_modules/ && npm install && npm install --dev",
+    "build": "node build.js",
+    "docs": "mv ./docs/_config.yml ./ && npx typedoc src/qb-record.ts && mv ./_config.yml ./docs/",
+    "test": "npx ava"
   },
   "dependencies": {
-    "lodash.merge": "^4.6.2",
-    "qb-field": "^0.3.0",
-    "moment": "^2.24.0",
-    "quickbase": "^2.11.2",
+    "deepmerge": "^4.2.2",
+    "qb-field": "1.0.0-alpha.0",
+    "quickbase": "3.0.0-alpha.12",
     "rfc4122": "^1.0.5"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react": "^6.24.1",
-    "browserify": "^16.5.0",
-    "minify": "^4.1.3"
+    "@ava/typescript": "^1.1.1",
+    "@types/node": "^13.13.2",
+    "ava": "^3.7.1",
+    "browserify": "^16.5.1",
+    "dotenv": "^8.2.0",
+    "minify": "^5.1.1",
+    "ts-node": "^8.9.1",
+    "typedoc": "^0.17.4",
+    "typescript": "^3.8.3"
   },
   "engines": {
-    "node": ">=4.0.*"
+    "node": ">=10.14.2"
   },
   "git": "git@github.com:tflanagan/node-qb-record.git"
 }
