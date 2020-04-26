@@ -1,170 +1,110 @@
-# QBRecord
-========
+qb-record
+=========
 
-A lightweight abstraction layer for QuickBase
+[![npm license](https://img.shields.io/npm/l/qb-record.svg)](https://www.npmjs.com/package/qb-record) [![npm version](https://img.shields.io/npm/v/qb-record.svg)](https://www.npmjs.com/package/qb-record) [![npm downloads](https://img.shields.io/npm/dm/qb-record.svg)](https://www.npmjs.com/package/qb-record)
 
-### Initialization
---------------
+A lightweight, promise based abstraction layer for Quick Base Records
 
-```js
-var record = new QBRecord({
-	quickbase: {
-		realm: '',
-		appToken: ''
-	},
-	// quickbase: QuickBase Instance
-	dbid: '' // defaults to dbid in url if found
-	fids: {
-		recordid: 3,
-		primaryKey: 3,
-		...
-	},
+Written in TypeScript, targets Nodejs and the Browser
 
-	// If this is an existing record, then set the record id and primary key:
-	// record: 123
-	// primaryKey: 123
-});
+This library targets the new RESTful JSON-based API, not the old XML-based API. If you want to use the old XML-based API, then please use [v2.x](https://github.com/tflanagan/node-qb-record/tree/master/) of this library.
+
+```
+IE 11 Users, if you are receiving this error:
+XMLHttpRequest: Network Error 0x80070005, Access is denied.
+
+This is not a limitation of the library, just how Quick Base's new API works.
+In order to use the new RESTful JSON-based API in Internet Explorer, you must
+change a security setting:
+
+- Go to Internet Options -> Security -> Custom Level
+- Scroll down to and find the "Miscellaneous" section
+- Ensure "Access data sources across domains" is set to "Enable"
+- Click "OK", "Yes", "OK"
 ```
 
-### Methods
+Install
 -------
+```
+# Install alpha channel
+$ npm install qb-record@alpha
+```
 
-#### `.clear()`
-This method clears the QBRecord instance of any trace of the existing record,
-but preserves defined settings
+Documentation
+-------------
 
-#### `.delete()`
-This method deletes the record from QuickBase, then calls `.clear()`.
+[TypeDoc Documentation](https://tflanagan.github.io/node-qb-record/)
 
-#### `.get(name)`
- - `name`: string, required
+Server-Side Example
+-------------------
+```typescript
+import { QBRecord } from 'qb-record';
+import { QuickBase } from 'quickbase';
 
-This method returns the stored value associated with the `name` argument,
-defined in the `fids` object in the inialization of the instance.
-
-Example:
-```js
-var record = new QBRecord({
-	quickbase: {
-		realm: 'data',
-		appToken: ''
-	},
-	dbid: 'abcdefg'
-	fids: {
-		recordid: 3,
-		primaryKey: 3,
-		name: 6
-	},
-	record: 123
-	primaryKey: 123
+const quickbase = new QuickBase({
+    realm: 'www',
+    userToken: 'xxxxxx_xxx_xxxxxxxxxxxxxxxxxxxxxxxxxx'
+    // Use tempToken if utilizing an authentication token sent
+    // up from client-side code. If possible, this is preferred.
+    // tempToken: 'xxxxxx_xxx_xxxxxxxxxxxxxxxxxxxxxxxxxx'
 });
 
-// load the record, then at some point request the 'name' value...
-
-var name = record.get('name');
-```
-
-#### `.getDBID()`
-This method returns the stored DBID.
-
-#### `.getFid(field, byId)`
- - `field`: string or integer, required
- - `byId`: boolean, default: `true`
-
-If `byId` is `true`, then this returns the Field Id of the passed in `field` (string).
-If `byId` is `false`, then this returns the Field Name of the passed in `field` (integer).
-
-#### `.getFids()`
-Returns the configured `fids` object.
-
-#### `.getField(id)`
- - `id`: integer, required
-
-If a record has been loaded, then returns the field object from the DoQuery with the Field ID of `id`.
-
-#### `.getFields()`
-If a record has been loaded, then returns the `fields` object from the DoQuery.
-
-#### `.getTableName()`
-If a record has been loaded, returns the table name.
-
-#### `.load(localQuery, localClist)`
- - `localQuery`: string
- - `localClist`: string
-
-This method executes an API_DoQuery for the stored Record ID value. Will
-automatically map all values defined in the `fids` object.
-
-#### `.loadSchema()`
-Executes an API_GetSchema and stores the returned results internally.
-
-#### `.save(fidsToSave)`
- - `fidsToSave`: array, defaults to undefined
-
-This method executes either an API_AddRecord or an API_EditRecord depending on
-the set Record ID. If a Record ID is stored, then it executes an API_EditRecord
-otherwise, an API_AddRecord.
-
-If `fidsToSave` is defined, then only configured fids in this array will be
-saved.
-
-If this executes an API_AddRecord, the newly assigned Record ID is
-automatically stored internally. If the defined primaryKey FID is also a
-defined field in the `fids` object, then this is also automatically stored
-internally.
-
-#### `.set(name, value)`
- - `name`: string, required
- - `value`: mixed, required
-
-This method sets the passed in value associated with the `name` argument,
-defined in the `fids` object in the inialization of the instance.
-
-Example:
-```js
-var record = new QBRecord({
-	quickbase: {
-		realm: 'data',
-		appToken: ''
-	},
-	dbid: 'abcdefg'
-	fids: {
-		recordid: 3,
-		primaryKey: 3,
-		name: 6
-	},
-	record: 123
-	primaryKey: 123
+const qbRecord = new QBRecord({
+	quickbase: quickbase,
+	dbid: 'xxxxxxxxx',
+	recordid: 3
 });
 
-record.set('name', 'This is the name!');
+(async () => {
+    try {
+        const results = await qbRecord.load();
+
+        console.log(qbRecord.get('recordid'), results.recordid);
+    }catch(err){
+        console.error(err);
+    }
+})();
 ```
 
-#### `.setDBID(dbid)`
- - `dbid`: string, required
+Client-Side Example
+-------------------
+Import `QBRecord` by loading `qb-record.browserify.min.js`
 
-Sets the `dbid` setting.
+```javascript
+var quickbase = new QuickBase({
+    realm: 'www'
+});
 
-#### `.setFid(name, id)`
- - `name`: string, required
- - `id`: integer, required
+var qbRecord = new QBRecord({
+	quickbase: quickbase,
+	dbid: 'xxxxxxxxx',
+	recordid: 3
+});
 
-Adds/Updates configured field with the name of `name` and the field id of `id`.
+// Using a Temporary Token
+quickbase.getTempToken().then(function(results){
+    quickbase.setTempToken(results.temporaryAuthorization);
 
-#### `.setFids(fields)`
- - `fields`: array, required
-
-`fields` is an array of `.setFid()` arguments.
-
-IE:
-```js
-record.setFids([
-	{ name: 'label', id: 6 },
-	{ name: 'total', id: 7 }
-]);
+    return qbRecord.load();
+}).then(function(results){
+    console.log(qbField.get('recordid'), results.recordid);
+}).catch(function(err){
+    console.error(err);
+});
 ```
 
-#### `.toJson(fidsToConvert)`
- - `fidsToConvert`: array, optional
+License
+-------
+Copyright 2019 Tristian Flanagan
 
- returns the record as a JSON object
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
