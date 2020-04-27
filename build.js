@@ -118,7 +118,7 @@ const writeFile = async (path, data) => {
 		const results = await minify('./dist/qb-record.browserify.js');
 		const license = await readFile('./LICENSE');
 
-		searchStr = '1\\:\\[function\\(e,t,n\\)\\{\\(function\\(t\\)\\{\\"use strict\\";';
+		searchStr = '1\\:\\[function\\(e,t,r\\)\\{\\(function\\(t\\)\\{\\"use strict\\";';
 		searchRgx = new RegExp(searchStr);
 
 		await writeFile('./dist/qb-record.browserify.min.js', results.toString().replace(searchRgx, [

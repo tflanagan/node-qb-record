@@ -87,6 +87,7 @@ export class QBRecord {
 
 	clear(): QBRecord {
 		this._data = {};
+		this._fields = [];
 
 		return this;
 	}
@@ -97,7 +98,9 @@ export class QBRecord {
 			where: `{'${this.getFid('recordid')}'.EX.'${this.get('recordid')}'}`
 		});
 
-		this.clear();
+		if(results.numberDeleted !== 0){
+			this.clear();
+		}
 
 		return results;
 	}
@@ -114,8 +117,8 @@ export class QBRecord {
 		return this._dbid;
 	}
 
-	getFid(field: string | number, byId?: false): number;
-	getFid(field: string | number, byId?: true): string;
+	getFid(field: string, byId?: false): number;
+	getFid(field: number, byId?: true): string;
 	getFid(field: string | number, byId: boolean = false): string | number {
 		const fids = this.getFids();
 		let id: string | number = -1;
@@ -125,6 +128,7 @@ export class QBRecord {
 				id = fids[field];
 			}
 		}else{
+			id = '';
 			field = +field;
 
 			Object.keys(fids).some((name) => {
@@ -219,13 +223,7 @@ export class QBRecord {
 		});
 
 		results.fields.forEach((field) => {
-			let result: QBField | undefined = undefined;
-
-			for(let i = 0; result === undefined && i < this._fields.length; ++i){
-				if(this._fields[i].getFid() === field.id){
-					result = this._fields[i];
-				}
-			}
+			let result = this.getField(field.id);
 
 			if(!result){
 				result = new QBField({
@@ -238,7 +236,7 @@ export class QBRecord {
 			}
 
 			Object.keys(field).forEach((attribute) => {
-				result!.set(attribute, field[attribute]);
+				result!.set(attribute, (field as Indexable)[attribute]);
 			});
 		});
 
@@ -263,13 +261,7 @@ export class QBRecord {
 		});
 
 		results.forEach((field) => {
-			let result: QBField | undefined = undefined;
-
-			for(let i = 0; result === undefined && i < this._fields.length; ++i){
-				if(this._fields[i].getFid() === field.id){
-					result = this._fields[i];
-				}
-			}
+			let result = this.getField(field.id);
 
 			if(!result){
 				result = new QBField({
@@ -282,7 +274,7 @@ export class QBRecord {
 			}
 
 			Object.keys(field).forEach((attribute) => {
-				result!.set(attribute, field[attribute]);
+				result!.set(attribute, (field as Indexable)[attribute]);
 			});
 		});
 
@@ -442,6 +434,10 @@ export class QBRecord {
 }
 
 /* Interfaces */
+interface Indexable {
+	[index: string]: any;
+}
+
 export interface QBRecordLoad {
 	query?: string;
 	clist?: string|number[];
