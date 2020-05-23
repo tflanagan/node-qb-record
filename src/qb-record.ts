@@ -31,16 +31,16 @@ export class QBRecord {
 		quickbase: {
 			realm: IS_BROWSER ? window.location.host.split('.')[0] : ''
 		},
-	
+
 		dbid: (() => {
 			if(IS_BROWSER){
 				const dbid = window.location.pathname.match(/^\/db\/(?!main)(.*)$/);
-	
+
 				if(dbid){
 					return dbid[1];
 				}
 			}
-	
+
 			return '';
 		})(),
 		fids: {
@@ -235,7 +235,7 @@ export class QBRecord {
 				this._fields.push(result);
 			}
 
-			Object.keys(field).forEach((attribute) => {
+			getObjectKeys(field).forEach((attribute) => {
 				result!.set(attribute, (field as Indexable)[attribute]);
 			});
 		});
@@ -273,7 +273,7 @@ export class QBRecord {
 				this._fields.push(result);
 			}
 
-			Object.keys(field).forEach((attribute) => {
+			getObjectKeys(field).forEach((attribute) => {
 				result!.set(attribute, (field as Indexable)[attribute]);
 			});
 		});
@@ -287,17 +287,19 @@ export class QBRecord {
 
 		const results = await this._qb.upsertRecords({
 			tableId: this.getDBID(),
-			mergeFieldId: this.getFid('primaryKey'),
+			mergeFieldId: this.getFid('recordid'),
 			data: [names.filter((name) => {
 				const fid = fids[name];
-	
+
 				return !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1;
 			}).reduce((record: QuickBaseRecord, name) => {
 				const fid = fids[name];
 
 				if(fid){
+					const value = this.get(name);
+
 					record[fid] = {
-						value: this.get(name)
+						value: value === undefined ? '' : value
 					};
 				}
 
@@ -426,11 +428,16 @@ export class QBRecord {
 			throw new TypeError('json argument must be type of object or a valid JSON string');
 		}
 
-		const newRecord = new QBRecord();		
+		const newRecord = new QBRecord();
 
 		return newRecord.fromJSON(json);
 	}
 
+}
+
+/* Helpers */
+function getObjectKeys<O>(obj: O): (keyof O)[] {
+    return Object.keys(obj) as (keyof O)[];
 }
 
 /* Interfaces */
@@ -473,4 +480,3 @@ if(IS_BROWSER){
 	// @ts-ignore
 	window.QBRecord = QBRecord;
 }
-
