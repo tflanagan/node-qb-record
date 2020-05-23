@@ -1,7 +1,7 @@
 {
   "name": "qb-record",
   "private": false,
-  "version": "3.0.0-alpha.3",
+  "version": "3.0.0-alpha.4",
   "description": "A lightweight abstraction layer for Quick Base",
   "keywords": [
     "QuickBase",

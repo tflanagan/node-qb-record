@@ -291,7 +291,7 @@ export class QBRecord {
 			data: [names.filter((name) => {
 				const fid = fids[name];
 
-				return !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1;
+				return !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1 || fid === this.getFid('recordid');
 			}).reduce((record: QuickBaseRecord, name) => {
 				const fid = fids[name];
 
@@ -315,7 +315,7 @@ export class QBRecord {
 		const record = results.data[0];
 
 		names.forEach((name) => {
-			this.set(name, record[fids[name]].value);
+			this.set(name, record[fids[name]]?.value);
 		});
 
 		return this._data;
