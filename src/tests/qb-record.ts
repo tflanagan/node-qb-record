@@ -12,7 +12,6 @@ dotenv.config();
 
 const QB_REALM = process.env.QB_REALM!;
 const QB_USERTOKEN = process.env.QB_USERTOKEN!;
-const QB_APPID = process.env.QB_APPID!;
 
 const qbOptions: QuickBaseOptions = {
 	server: 'api.quickbase.com',
@@ -44,19 +43,70 @@ const qbFieldOptions: QBRecordOptions = {
 
 const qbRecord = new QBRecord(qbFieldOptions);
 
-let dbid: string = '',
-	fid: number = -1;
+let newAppId: string;
+let newDbid: string;
+let newFid: number;
 
+test.after.always('deleteFields()', async (t) => {
+	if(!newFid){
+		return t.pass();
+	}
+
+	const results = await qb.deleteFields({
+		tableId: newDbid,
+		fieldIds: [ newFid ]
+	});
+
+	t.truthy(results.deletedFieldIds[0] === newFid);
+});
+
+test.after.always('deleteTable()', async (t) => {
+	if(!newDbid){
+		return t.pass();
+	}
+
+	const results = await qb.deleteTable({
+		appId: newAppId,
+		tableId: newDbid
+	});
+
+	t.truthy(results.deletedTableId === newDbid);
+});
+
+test.after.always('deleteApp()', async (t) => {
+	if(!newAppId){
+		return t.pass();
+	}
+
+	const results = await qb.deleteApp({
+		appId: newAppId,
+		name: 'Test Node Quick Base Application'
+	});
+
+	t.truthy(results.deletedAppId === newAppId);
+});
+
+test('QuickBase:createApp()', async (t) => {
+	const results = await qb.createApp({
+		name: 'Test Node Quick Base Application',
+		assignToken: true
+	});
+
+	newAppId = results.id;
+
+	t.truthy(newAppId && results.name === 'Test Node Quick Base Application');
+});
+	
 test('QuickBase:createTable()', async (t) => {
 	const results = await qb.createTable({
-		appId: QB_APPID,
+		appId: newAppId,
 		name: 'Test Name'
 	});
 
 	qbField.setDBID(results.id);
 	qbRecord.setDBID(results.id);
 
-	dbid = qbRecord.getDBID();
+	newDbid = qbRecord.getDBID();
 
 	t.truthy(qbRecord.getDBID());
 });
@@ -67,8 +117,8 @@ test('QBField:save() - create', async (t) => {
 
 	const results = await qbField.save();
 
-	fid = qbField.get('fid');
-	qbRecord.setFid('test', fid);
+	newFid = qbField.get('fid');
+	qbRecord.setFid('test', newFid);
 
 	t.truthy(qbField.get('fid') > 0 && qbField.get('label') === 'Test Field' && results.label === 'Test Field');
 });
@@ -124,19 +174,4 @@ test('delete()', async (t) => {
 	const results = await qbRecord.delete();
 
 	t.truthy(results.numberDeleted === 1);
-});
-
-test('QBField:delete()', async (t) => {
-	const results = await qbField.delete();
-
-	t.truthy(results.deletedFieldIds[0] === fid);
-});
-
-test('QuickBase:deleteTable()', async (t) => {
-	const results = await qb.deleteTable({
-		appId: QB_APPID,
-		tableId: dbid
-	});
-
-	t.truthy(results.deletedTableId === dbid);
 });
