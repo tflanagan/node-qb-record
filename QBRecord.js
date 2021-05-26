@@ -3,7 +3,7 @@
 /* Versioning */
 const VERSION_MAJOR = 2;
 const VERSION_MINOR = 0;
-const VERSION_PATCH = 14;
+const VERSION_PATCH = 17;
 
 /* Dependencies */
 const merge = require('lodash.merge');
