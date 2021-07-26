@@ -326,7 +326,7 @@ class QBRecord {
 				fields: []
 			};
 
-		if(rid || key){
+		if(rid || (rid && key)){
 			action = 'API_EditRecord';
 
 			if(this.getFid('recordid') !== this.getFid('primaryKey')){
