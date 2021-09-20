@@ -326,11 +326,18 @@ class QBRecord {
 				fields: []
 			};
 
-		if(rid || (rid && key)){
+		if(rid > 0 || (rid > 0 && key)){
 			action = 'API_EditRecord';
 
 			if(this.getFid('recordid') !== this.getFid('primaryKey')){
-				options.key = key;
+				const field = this.getField(this.getFid('primaryKey'));
+				let val = key;
+
+				if(field){
+					val = QBField.FormatValue(field, val);
+				}
+
+				options.key = val;
 			}else{
 				options.rid = rid;
 			}
