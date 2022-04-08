@@ -1,7 +1,7 @@
 {
   "name": "qb-record",
   "private": false,
-  "version": "2.0.20",
+  "version": "2.0.21",
   "description": "A lightweight abstraction layer for QuickBase",
   "keywords": [
     "QuickBase",
@@ -34,6 +34,7 @@
     "Tristian Flanagan <contact@tristianflanagan.com> (https://github.com/tflanagan)"
   ],
   "main": "QBRecord.js",
+  "types": "QBRecord.d.ts",
   "repository": {
     "type": "git",
     "url": "git@github.com:tflanagan/node-qb-record.git"
@@ -43,12 +44,13 @@
   },
   "dependencies": {
     "lodash.merge": "^4.6.2",
-    "qb-field": "^0.3.3",
     "moment": "^2.24.0",
-    "quickbase": "^2.12.1",
+    "qb-field": "^0.3.4",
+    "quickbase": "^2.14.1",
     "rfc4122": "^1.0.5"
   },
   "devDependencies": {
+    "@types/node": "^17.0.23",
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",

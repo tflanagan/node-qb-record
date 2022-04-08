@@ -139,7 +139,7 @@ class QBRecord {
 		return id;
 	};
 
-	getFids(field){
+	getFids(){
 		return this._fids;
 	};
 
