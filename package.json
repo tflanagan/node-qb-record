@@ -1,7 +1,6 @@
 {
   "name": "qb-record",
-  "private": false,
-  "version": "3.0.0",
+  "version": "4.2.0",
   "description": "A lightweight abstraction layer for Quick Base",
   "keywords": [
     "QuickBase",
@@ -10,9 +9,11 @@
     "quick base",
     "qb",
     "api",
-    "QBrecord",
+    "QBRecord",
     "qbrecord",
-    "qb-record"
+    "qb-record",
+    "qb record",
+    "QB Record"
   ],
   "homepage": "https://github.com/tflanagan/node-qb-record",
   "bugs": {
@@ -25,16 +26,8 @@
     "url": "https://github.com/tflanagan",
     "email": "contact@tristianflanagan.com"
   },
-  "maintainers": [
-    {
-      "name": "Tristian Flanagan",
-      "url": "https://github.com/tflanagan",
-      "email": "contact@tristianflanagan.com"
-    }
-  ],
-  "contributors": [
-    "Tristian Flanagan <contact@tristianflanagan.com> (https://github.com/tflanagan)"
-  ],
+  "maintainers": [],
+  "contributors": [],
   "main": "./dist/qb-record.js",
   "types": "./dist/qb-record.d.ts",
   "repository": {
@@ -51,20 +44,19 @@
   },
   "dependencies": {
     "deepmerge": "^4.2.2",
-    "qb-field": "1.0.1",
-    "quickbase": "3.0.2",
+    "qb-field": "file:../node-qb-field/",
+    "quickbase": "file:../node-quickbase/",
     "rfc4122": "^1.0.6"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
-    "@types/node": "^13.13.2",
-    "ava": "^3.7.1",
-    "browserify": "^16.5.1",
+    "@types/node": "^14.14.10",
+    "ava": "^3.13.0",
+    "browserify": "^17.0.0",
     "dotenv": "^8.2.0",
-    "minify": "^5.1.1",
-    "ts-node": "^8.9.1",
-    "typedoc": "^0.17.4",
-    "typescript": "^3.8.3"
+    "minify": "^6.0.1",
+    "typedoc": "^0.19.2",
+    "typescript": "^4.1.2"
   },
   "engines": {
     "node": ">=10.14.2"

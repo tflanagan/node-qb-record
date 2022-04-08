@@ -33,19 +33,24 @@ const qbOptions: QuickBaseOptions = {
 const qb = new QuickBase(qbOptions);
 const qbField = new QBField({
 	quickbase: qb,
-	dbid: '',
+	tableId: '',
 	fid: -1
 });
 
-const qbFieldOptions: QBRecordOptions = {
+const qbFieldOptions: Partial<QBRecordOptions> = {
 	quickbase: qb
 };
 
 const qbRecord = new QBRecord(qbFieldOptions);
 
 let newAppId: string;
-let newDbid: string;
+let newTableId: string;
 let newFid: number;
+
+test('QuickBase instance match', async (t) => {
+	// @ts-ignore
+	return t.truthy(qb === qbField._qb && qb === qbRecord._qb);
+});
 
 test.after.always('deleteFields()', async (t) => {
 	if(!newFid){
@@ -53,7 +58,7 @@ test.after.always('deleteFields()', async (t) => {
 	}
 
 	const results = await qb.deleteFields({
-		tableId: newDbid,
+		tableId: newTableId,
 		fieldIds: [ newFid ]
 	});
 
@@ -61,16 +66,16 @@ test.after.always('deleteFields()', async (t) => {
 });
 
 test.after.always('deleteTable()', async (t) => {
-	if(!newDbid){
+	if(!newTableId){
 		return t.pass();
 	}
 
 	const results = await qb.deleteTable({
 		appId: newAppId,
-		tableId: newDbid
+		tableId: newTableId
 	});
 
-	t.truthy(results.deletedTableId === newDbid);
+	t.truthy(results.deletedTableId === newTableId);
 });
 
 test.after.always('deleteApp()', async (t) => {
@@ -86,7 +91,7 @@ test.after.always('deleteApp()', async (t) => {
 	t.truthy(results.deletedAppId === newAppId);
 });
 
-test('QuickBase:createApp()', async (t) => {
+test.before('QuickBase:createApp()', async (t) => {
 	const results = await qb.createApp({
 		name: 'Test Node Quick Base Application',
 		assignToken: true
@@ -97,21 +102,21 @@ test('QuickBase:createApp()', async (t) => {
 	t.truthy(newAppId && results.name === 'Test Node Quick Base Application');
 });
 	
-test('QuickBase:createTable()', async (t) => {
+test.before('QuickBase:createTable()', async (t) => {
 	const results = await qb.createTable({
 		appId: newAppId,
 		name: 'Test Name'
 	});
 
-	qbField.setDBID(results.id);
-	qbRecord.setDBID(results.id);
+	qbField.setTableId(results.id);
+	qbRecord.setTableId(results.id);
 
-	newDbid = qbRecord.getDBID();
+	newTableId = qbRecord.getTableId();
 
-	t.truthy(qbRecord.getDBID());
+	t.truthy(qbRecord.getTableId());
 });
 
-test('QBField:save() - create', async (t) => {
+test.before('QBField:save() - create', async (t) => {
 	qbField.set('fieldType', 'text');
 	qbField.set('label', 'Test Field');
 
@@ -156,15 +161,125 @@ test('QBRecord.fromJSON()', async (t) => {
 	t.truthy(JSON.stringify(newQBRecord.toJSON()) === JSON.stringify(json));
 });
 
+test(`load("{'3'.GT.'0'}")`, async (t) => {
+	const results = await qbRecord.load("{'3'.GT.'0'}");
+
+	t.truthy(qbRecord.get('recordid') === results.recordid);
+});
+
+test(`load({ query: "{'3'.GT.'0'}" })`, async (t) => {
+	const results = await qbRecord.load({
+		query: "{'3'.GT.'0'}"
+	});
+
+	t.truthy(qbRecord.get('recordid') === results.recordid);
+});
+
+test('load({})', async (t) => {
+	const results = await qbRecord.load({});
+
+	t.truthy(qbRecord.get('recordid') === results.recordid);
+});
+
 test('load()', async (t) => {
 	const results = await qbRecord.load();
 
 	t.truthy(qbRecord.get('recordid') === results.recordid);
 });
 
-test('save() - update', async (t) => {
-	qbRecord.set('test', 'New Test Value');
+test('loadSchema()', async (t) => {
+	const results = await qbRecord.loadSchema();
 
+	t.truthy(results.length === 6);
+});
+
+test("get('_doesntExist')", (t) => {
+	t.truthy(qbRecord.get('_doesntExist') === undefined);
+});
+
+test("get/set('_randomValue')", (t) => {
+	const newValue = 'New Random Value';
+
+	qbRecord.set('_randomValue', newValue);
+
+	t.truthy(qbRecord.get('_randomValue') === newValue);
+});
+
+test("get/set('test')", (t) => {
+	const newValue = 'New Test Value';
+
+	qbRecord.set('test', newValue);
+
+	t.truthy(qbRecord.get('test') === newValue);
+});
+
+test('getFid(6, true)', (t) => {
+	const fidName = qbRecord.getFid(6, true);
+
+	t.truthy(fidName === 'test');
+});
+
+test("getFid('test')", (t) => {
+	const fid = qbRecord.getFid('test');
+
+	t.truthy(fid === 6);
+});
+
+test('getFid(7, true)', (t) => {
+	const fidName = qbRecord.getFid(7, true);
+
+	t.truthy(fidName === '');
+});
+
+test('getFid(7)', (t) => {
+	const fidName = qbRecord.getFid(7);
+
+	t.truthy(fidName === -1);
+});
+
+test("getFid('_doesntExist')", (t) => {
+	const fidName = qbRecord.getFid('_doesntExist');
+
+	t.truthy(fidName === -1);
+});
+
+test('getFids()', (t) => {
+	t.truthy(qbRecord.getFids().test === 6);
+});
+
+test('getField(6)', (t) => {
+	const field = qbRecord.getField(6);
+
+	if(field !== undefined){
+		return t.truthy(field.get('label') === 'Test Field');
+	}
+
+	t.fail();
+});
+
+test('getFields()', (t) => {
+	const fields = qbRecord.getFields();
+
+	t.truthy(fields.length === 6);
+});
+
+test("save([ 'test' ]) - update", async (t) => {
+	const results = await qbRecord.save([
+		'test'
+	]);
+
+	t.truthy(qbRecord.get('test') === 'New Test Value' && results.test === 'New Test Value');
+});
+
+test("save([ 6 ]) - update", async (t) => {
+	const results = await qbRecord.save([
+		6
+	]);
+
+	t.truthy(qbRecord.get('test') === 'New Test Value' && results.test === 'New Test Value');
+});
+
+test('save() - update', async (t) => {
 	const results = await qbRecord.save();
 
 	t.truthy(qbRecord.get('test') === 'New Test Value' && results.test === 'New Test Value');
@@ -174,4 +289,10 @@ test('delete()', async (t) => {
 	const results = await qbRecord.delete();
 
 	t.truthy(results.numberDeleted === 1);
+});
+
+test('delete() - empty', async (t) => {
+	const results = await qbRecord.delete();
+
+	t.truthy(results.numberDeleted === 0);
 });

@@ -2,6 +2,7 @@
 
 /* Dependencies */
 const fs = require('fs');
+const pkg = require('./package.json');
 const minify = require('minify');
 const execNode = require('child_process').exec;
 const Browserify = require('browserify');
@@ -33,7 +34,7 @@ const exec = async (cmd) => {
 			}
 
 			if(stderr && !stderr.match(/ExperimentalWarning/)){
-				err = new Error('Command failed: ' + cmd);
+				err = new Error(`Command failed: ${cmd}`);
 
 				err.stdout = stdout;
 				err.stderr = stderr;
@@ -46,6 +47,28 @@ const exec = async (cmd) => {
 	});
 };
 
+const formatPerson = (person) => {
+	if(typeof(person) === 'string'){
+		return person;
+	}
+
+	const parts = [];
+
+	if(person.name){
+		parts.push(person.name);
+	}
+
+	if(person.email){
+		parts.push(`<${person.email}>`);
+	}
+
+	if(person.url){
+		parts.push(`(${person.url})`);
+	}
+
+	return parts.join(' ');
+};
+
 const readFile = async (path) => {
 	return new Promise((resolve, reject) => {
 		fs.readFile(path, (err, buffer) => {
@@ -54,6 +77,18 @@ const readFile = async (path) => {
 			}
 
 			resolve(buffer);
+		});
+	});
+};
+
+const unlinkFile = async (path) => {
+	return new Promise((resolve, reject) => {
+		fs.unlink(path, (err) => {
+			if(err){
+				return reject(err);
+			}
+
+			resolve();
 		});
 	});
 };
@@ -73,26 +108,14 @@ const writeFile = async (path, data) => {
 /* Build */
 (async () => {
 	try {
-		let searchStr, searchRgx;
+		const mainFilename = pkg.name;
 
 		console.log('Compiling TypeScript for Node...');
 		await exec('npx tsc');
 
-		console.log('Injecting Promise polyfill...');
-		const source = await readFile('./dist/qb-record.js');
-
-		searchStr = 'const deepmerge_1 =';
-		searchRgx = new RegExp(searchStr);
-
-		await writeFile('./dist/qb-record.prep.js', source.toString().replace(searchRgx, [
-			'const Promise = require(\'bluebird\');',
-			'if(!global.Promise){ global.Promise = Promise; }',
-			searchStr
-		].join('\n')));
-
 		console.log('Browserify...');
 		const browserifiedPrep = await browserify([
-			'./dist/qb-record.prep.js'
+			`./dist/${mainFilename}.js`
 		]);
 
 		console.log('Compiling for Browser...');
@@ -112,17 +135,42 @@ const writeFile = async (path, data) => {
 			}
 		});
 
-		await writeFile('./dist/qb-record.browserify.js', browserified.outputText);
+		await writeFile(`./dist/${mainFilename}.browserify.js`, browserified.outputText);
 
-		console.log('Minify...');
-		const results = await minify('./dist/qb-record.browserify.js');
-		const license = await readFile('./LICENSE');
+		console.log('Minify Browser...');
+		const browserSource = await minify(`./dist/${mainFilename}.browserify.js`);
 
-		searchStr = '1\\:\\[function\\(e,t,r\\)\\{\\(function\\(t\\)\\{\\"use strict\\";';
-		searchRgx = new RegExp(searchStr);
+		console.log('Loading Source...');
+		const source = (await readFile(`./dist/${mainFilename}.js`)).toString().trim();
 
-		await writeFile('./dist/qb-record.browserify.min.js', results.toString().replace(searchRgx, [
-			license.toString().split('\n').map((line, i, lines) => {
+		console.log('Loading License...');
+		const license = (await readFile('./LICENSE')).toString().trim();
+
+		console.log('Prepending Build and Project Information...');
+		const projectInfo = [
+			'/*!',
+			` * Project Name: ${pkg.name}`,
+			` * Project Description: ${pkg.description}`,
+			` * Version: ${pkg.version}`,
+			` * Build Timestamp: ${new Date().toISOString()}`,
+			` * Project Homepage: ${pkg.homepage}`,
+			` * Git Location: ${pkg.repository.url}`,
+			` * Authored By: ${formatPerson(pkg.author)}`,
+			pkg.maintainers && pkg.maintainers.length > 0 ? [
+				' * Maintained By:',
+				pkg.maintainers.map((maintainer) => {
+					return ` *                ${formatPerson(maintainer)}`;
+				}).join('\n'),
+			].join('\n') : '',
+			pkg.contributors && pkg.contributors.length > 0 ? [
+				' * Contributors:',
+				pkg.contributors.map((contributor) => {
+					return ` *               ${formatPerson(contributor)}`;
+				}).join('\n'),
+			].join('\n') : '',
+			` * License: ${pkg.license}`,
+			'*/',
+			license.split('\n').map((line, i, lines) => {
 				line = ' * ' + line;
 
 				if(i === 0){
@@ -133,15 +181,23 @@ const writeFile = async (path, data) => {
 				}
 
 				return line;
-			}).join('\n'),
-			searchStr.replace(/\\/g, '')
-		].join('\n')));
+			}).join('\n').trim()
+		].filter((val) => {
+			return !!val;
+		}).join('\n').trim();
+
+		await writeFile(`./dist/${mainFilename}.browserify.min.js`, [
+			projectInfo,
+			browserSource.trim()
+		].join('\n'));
+
+		await writeFile(`./dist/${mainFilename}.js`, [
+			projectInfo,
+			source.trim()
+		].join('\n'));
 
 		console.log('Cleanup...');
-		await exec([
-			'rm ./dist/qb-record.prep.js',
-			'rm ./dist/qb-record.browserify.js'
-		].join(' && '));
+		await unlinkFile(`./dist/${mainFilename}.browserify.js`);
 
 		console.log('Done building.');
 	}catch(err){
