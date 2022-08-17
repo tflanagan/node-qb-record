@@ -78,15 +78,23 @@ export class QBRecord {
 		this.id = rfc4122.v4();
 
 		if(options){
-			if(options.quickbase && (options.quickbase as QuickBase).CLASS_NAME === 'QuickBase'){
-				this._qb = (options.quickbase as QuickBase);
-			}else{
-				this._qb = new QuickBase(options.quickbase as QuickBaseOptions);
-			}
-	
-			delete options.quickbase;
+			const {
+				quickbase,
+				...classOptions
+			} = options || {};
 
-			const settings = merge(QBRecord.defaults, options || {});
+			if(quickbase){
+				// @ts-ignore
+				if(quickbase && quickbase.CLASS_NAME === 'QuickBase'){
+					this._qb = quickbase as QuickBase;
+				}else{
+					this._qb = new QuickBase(quickbase as QuickBaseOptions);
+				}
+			}else{
+				this._qb = new QuickBase();
+			}
+
+			const settings = merge(QBRecord.defaults, classOptions);
 
 			this.setTableId(settings.tableId)
 				.setFids(settings.fids)
@@ -302,13 +310,13 @@ export class QBRecord {
 		return this.getFields();
 	}
 
-	async save(fidsToSave?: (string|number)[]): Promise<QBRecordData> {
+	async save(fidsToSave?: (string|number)[], mergeFieldId?: number): Promise<QBRecordData> {
 		const fids = this.getFids();
 		const names = getObjectKeys(fids);
 
 		const results = await this._qb.upsertRecords({
 			tableId: this.getTableId(),
-			mergeFieldId: this.getFid('recordid'),
+			mergeFieldId: mergeFieldId || this.getFid('recordid'),
 			data: [names.filter((name) => {
 				const fid = fids[name];
 
@@ -472,7 +480,7 @@ export class QBRecord {
 
 	/**
 	 * Returns a new QBRecord instance built off of `options`, that inherits configuration data from the passed in `data` argument.
-	 * 
+	 *
 	 * @param options QBRecord instance options
 	 * @param data Quick Base Record data
 	 */
@@ -484,7 +492,7 @@ export class QBRecord {
 				newRecord.set(property, data[property]);
 			});
 		}
-	
+
 		return newRecord;
 	};
 
@@ -529,10 +537,6 @@ export type QBRecordData = {
 
 export type QBRecordFids = {
 	[index in string | number]: number;
-}
-
-interface test {
-	get: () => void
 }
 
 /* Export to Browser */

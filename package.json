@@ -1,6 +1,6 @@
 {
   "name": "qb-record",
-  "version": "4.2.0",
+  "version": "4.3.1",
   "description": "A lightweight abstraction layer for Quick Base",
   "keywords": [
     "QuickBase",
@@ -44,8 +44,8 @@
   },
   "dependencies": {
     "deepmerge": "^4.2.2",
-    "qb-field": "file:../node-qb-field/",
-    "quickbase": "file:../node-quickbase/",
+    "qb-field": "^4.3.1",
+    "quickbase": "^4.3.1",
     "rfc4122": "^1.0.6"
   },
   "devDependencies": {
@@ -55,8 +55,8 @@
     "browserify": "^17.0.0",
     "dotenv": "^8.2.0",
     "minify": "^6.0.1",
-    "typedoc": "^0.19.2",
-    "typescript": "^4.1.2"
+    "typedoc": "^0.20.34",
+    "typescript": "^4.2.3"
   },
   "engines": {
     "node": ">=10.14.2"
