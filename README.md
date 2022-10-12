@@ -27,7 +27,7 @@ Install
 -------
 ```
 # Install
-$ npm install qb-record
+$ npm install --save qb-record
 ```
 
 Documentation
@@ -82,9 +82,9 @@ var qbRecord = new QBRecord({
 });
 
 // Using a Temporary Token
-quickbase.getTempToken().then(function(results){
-    quickbase.setTempToken(results.temporaryAuthorization);
-
+quickbase.getTempTokenDBID({
+    dbid: 'xxxxxxxxx'
+}).then(function(results){
     return qbRecord.load();
 }).then(function(results){
     console.log(qbField.get('recordid'), results.recordid);

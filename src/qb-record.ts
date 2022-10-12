@@ -6,10 +6,13 @@ import RFC4122 from 'rfc4122';
 import {
 	QuickBase,
 	QuickBaseOptions,
-	QuickBaseResponseDeleteRecords,
-	QuickBaseRecord
+	QuickBaseRequest,
+	QuickBaseResponseDeleteRecords
 } from 'quickbase';
-import { QBField, QBFieldJSON } from 'qb-field';
+import {
+	QBField,
+	QBFieldJSON
+} from 'qb-field';
 
 /* Globals */
 const VERSION = require('../package.json').version;
@@ -17,22 +20,11 @@ const IS_BROWSER = typeof(window) !== 'undefined';
 const rfc4122 = new RFC4122();
 
 /* Main Class */
-export class QBRecord {
+export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 
-	/**
-	 * The class name
-	 *
-	 * Loading multiple instances of this class results in failed `instanceof` checks.
-	 * `Function.name` is corrupted by the browserify/minify processes.
-	 * Allow code to check if an object is this class by look at this `CLASS_NAME`
-	 * property. Code can further check `VERSION` to ensure correct versioning
-	 */
 	public readonly CLASS_NAME = 'QBRecord';
 	static readonly CLASS_NAME = 'QBRecord';
 
-	/**
-	 * The loaded library version
-	 */
 	static readonly VERSION: string = VERSION;
 
 	/**
@@ -70,57 +62,52 @@ export class QBRecord {
 
 	private _qb: QuickBase;
 	private _tableId: string = '';
-	private _fids: QBRecordFids = {};
+	private _fids: Record<any, number> = {};
 	private _fields: QBField[] = [];
-	private _data: QBRecordData = {};
+	private _data: Record<any, any> = {};
 
-	constructor(options?: Partial<QBRecordOptions>){
+	constructor(options?: Partial<QBRecordOptions<RecordData>>){
 		this.id = rfc4122.v4();
 
-		if(options){
-			const {
-				quickbase,
-				...classOptions
-			} = options || {};
+		const {
+			quickbase,
+			...classOptions
+		} = options || {};
 
-			if(quickbase){
-				// @ts-ignore
-				if(quickbase && quickbase.CLASS_NAME === 'QuickBase'){
-					this._qb = quickbase as QuickBase;
-				}else{
-					this._qb = new QuickBase(quickbase as QuickBaseOptions);
-				}
-			}else{
-				this._qb = new QuickBase();
-			}
-
-			const settings = merge(QBRecord.defaults, classOptions);
-
-			this.setTableId(settings.tableId)
-				.setFids(settings.fids)
-				.set('recordid', settings.recordid)
-				.set('primaryKey', settings.primaryKey);
+		if(QuickBase.IsQuickBase(quickbase)){
+			this._qb = quickbase;
 		}else{
-			this._qb = new QuickBase();
+			this._qb = new QuickBase(merge.all([
+				QBRecord.defaults.quickbase,
+				quickbase || {}
+			]));
 		}
+
+		const settings = merge(QBRecord.defaults, classOptions);
+
+		this.setTableId(settings.tableId)
+			.setFids(settings.fids as Record<any, number>)
+			.set('recordid', settings.recordid)
+			.set('primaryKey', settings.primaryKey);
 
 		return this;
 	}
 
-	clear(): QBRecord {
+	clear(): this {
 		this._data = {};
 		this._fields = [];
 
 		return this;
 	}
 
-	async delete(): Promise<QuickBaseResponseDeleteRecords> {
+	async delete({ requestOptions }: QuickBaseRequest = {}): Promise<QuickBaseResponseDeleteRecords> {
 		const recordid = this.get('recordid');
 
 		if(recordid){
 			const results = await this._qb.deleteRecords({
 				tableId: this.getTableId(),
-				where: `{'${this.getFid('recordid')}'.EX.'${recordid}'}`
+				where: `{'${this.getFid('recordid')}'.EX.'${recordid}'}`,
+				requestOptions
 			});
 
 			if(results.numberDeleted !== 0){
@@ -137,7 +124,9 @@ export class QBRecord {
 		}
 	}
 
-	get(field: string | number): any {
+	get<T extends keyof RecordData>(field: T): RecordData[T];
+	get<T = any>(field: any): T;
+	get(field: any): any {
 		return this._data[field];
 	}
 
@@ -145,6 +134,7 @@ export class QBRecord {
 		return this._tableId;
 	}
 
+	getFid<T extends keyof RecordData>(field: T): number;
 	getFid(field: number, byId: true): string;
 	getFid(field: string | number, byId?: false): number;
 	getFid(field: string | number, byId: boolean = false): string | number {
@@ -159,8 +149,8 @@ export class QBRecord {
 			id = '';
 			field = +field;
 
-			getObjectKeys(fids).some((name) => {
-				if(fids[name] === field){
+			Object.entries(fids).some(([ name, fid ]) => {
+				if(fid === field){
 					id = name;
 
 					return true;
@@ -173,18 +163,20 @@ export class QBRecord {
 		return id;
 	}
 
-	getFids(): QBRecordFids {
-		return this._fids;
+	getFids(): QBFids<RecordData> {
+		return this._fids as QBFids<RecordData>;
 	}
 
-	getField(id: number): QBField | undefined {
+	getField(id: number, returnIndex: true): number | undefined;
+	getField(id: number, returnIndex?: false): QBField | undefined;
+	getField(id: number, returnIndex: boolean = false): number | QBField | undefined {
 		const fields = this.getFields();
 
-		let i = 0, result = undefined;
+		let result = undefined;
 
-		for(; result === undefined && i < fields.length; ++i){
+		for(let i = 0; result === undefined && i < fields.length; ++i){
 			if(fields[i].getFid() === id){
-				result = fields[i];
+				result = returnIndex ? i : fields[i];
 			}
 		}
 
@@ -195,18 +187,11 @@ export class QBRecord {
 		return this._fields;
 	}
 
-	async load(options?: string): Promise<QBRecordData>;
-	async load(options?: QBRecordLoad): Promise<QBRecordData>;
-	async load(query?: string | QBRecordLoad, clist?: string|number[]): Promise<QBRecordData> {
+	async load({ clist, query, requestOptions }: QBRecordLoad = {}): Promise<Record<any, any>> {
 		const where = [];
 
-		let fids = this.getFids();
+		let fids = this.getFids() as Record<any, any>;
 		let select = [];
-
-		if(typeof(query) === 'object'){
-			clist = query.clist;
-			query = query.query;
-		}
 
 		if(query){
 			where.push(`(${query})`);
@@ -226,7 +211,7 @@ export class QBRecord {
 				select = clist;
 			}
 
-			fids = select.reduce((fids: QBRecordFids, fid) => {
+			fids = select.reduce((fids, fid) => {
 				let name: string | number = this.getFid(fid, true);
 
 				if(!name){
@@ -238,17 +223,18 @@ export class QBRecord {
 				fids[name] = fid;
 
 				return fids;
-			}, {});
+			}, {} as Record<any, any>);
 		}else{
-			select = getObjectKeys(fids).map((name) => {
-				return fids[name];
+			select = Object.entries(fids).map((fid) => {
+				return fid[1];
 			});
 		}
 
 		const results = await this._qb.runQuery({
 			tableId: this.getTableId(),
 			where: where.join('AND'),
-			select: select
+			select: select,
+			requestOptions
 		});
 
 		results.fields.forEach((field) => {
@@ -264,8 +250,8 @@ export class QBRecord {
 				this._fields.push(result);
 			}
 
-			getObjectKeys(field).forEach((attribute) => {
-				result!.set(attribute, (field as Indexable)[attribute]);
+			Object.entries(field).forEach(([ attribute, property ]) => {
+				result!.set(attribute, property);
 			});
 		});
 
@@ -275,18 +261,17 @@ export class QBRecord {
 
 		const record = results.data[0];
 
-		getObjectKeys(fids).forEach((name) => {
-			const fid = this.getFid(name);
-
+		Object.entries(fids).forEach(([ name, fid ]) => {
 			this.set(name, record[fid].value);
 		});
 
 		return this._data;
 	}
 
-	async loadSchema(): Promise<QBField[]> {
+	async loadSchema({ requestOptions }: QuickBaseRequest = {}): Promise<QBField[]> {
 		const results = await this._qb.getFields({
-			tableId: this.getTableId()
+			tableId: this.getTableId(),
+			requestOptions
 		});
 
 		results.forEach((field) => {
@@ -302,26 +287,33 @@ export class QBRecord {
 				this._fields.push(result);
 			}
 
-			getObjectKeys(field).forEach((attribute) => {
-				result!.set(attribute, (field as Indexable)[attribute]);
+			Object.entries(field).forEach(([ property, value ]) => {
+				result!.set(property, value);
 			});
 		});
 
 		return this.getFields();
 	}
 
-	async save(fidsToSave?: (string|number)[], mergeFieldId?: number): Promise<QBRecordData> {
+	async save({
+		fidsToSave,
+		mergeFieldId,
+		requestOptions
+	}: QuickBaseRequest & {
+		fidsToSave?: (keyof RecordData | number)[];
+		mergeFieldId?: number;
+	} = {}): Promise<Record<any, any>> {
 		const fids = this.getFids();
-		const names = getObjectKeys(fids);
+		const names = Object.entries(fids).map(([ name ]) => name);
 
-		const results = await this._qb.upsertRecords({
+		const results = await this._qb.upsert({
 			tableId: this.getTableId(),
 			mergeFieldId: mergeFieldId || this.getFid('recordid'),
 			data: [names.filter((name) => {
 				const fid = fids[name];
 
 				return !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1 || fid === this.getFid('recordid');
-			}).reduce((record: QuickBaseRecord, name) => {
+			}).reduce((record, name) => {
 				const fid = fids[name];
 
 				if(fid){
@@ -333,12 +325,13 @@ export class QBRecord {
 				}
 
 				return record;
-			}, {})],
+			}, {} as Record<string, { value: any }>)],
 			fieldsToReturn: names.map((name) => {
 				return fids[name];
 			}).filter((val, i, arr) => {
 				return arr.indexOf(val) === i;
-			})
+			}),
+			requestOptions
 		});
 
 		const record = results.data[0];
@@ -361,28 +354,39 @@ export class QBRecord {
 		return this._data;
 	}
 
-	set(fid: string | number, value: any): QBRecord {
-		this._data[fid] = value;
+	set<T extends keyof RecordData>(field: T, value: RecordData[T]): this;
+	set<T = any>(field: any, value: any): this;
+	set(field: any, value: any): this;
+	set(field: any, value: any): this {
+		this._data[field] = value;
 
 		return this;
 	}
 
-	setTableId(tableId: string): QBRecord {
+	setTableId(tableId: string): this {
 		this._tableId = tableId;
 
 		return this;
 	}
 
-	setFid(name: string | number, id: number): QBRecord {
+	setFid<T extends keyof RecordData>(name: T, id: number): this;
+	setFid(name: string | number, id: number): this;
+	setFid(name: string | number, id: number): this {
 		this._fids[name] = +id;
 
 		return this;
 	}
 
-	setFids(fields: QBRecordFids): QBRecord {
-		getObjectKeys(fields).forEach((name) => {
-			this.setFid(name, fields[name]);
+	setFids(fields: Record<any, number>): this {
+		Object.entries(fields).forEach(([ name, fid ]) => {
+			this.setFid(name, fid);
 		});
+
+		return this;
+	}
+
+	setFields(fields: QBField[]): this {
+		this._fields = fields;
 
 		return this;
 	}
@@ -392,7 +396,7 @@ export class QBRecord {
 	 *
 	 * @param json QBRecord serialized JSON
 	 */
-	fromJSON(json: string | QBRecordJSON): QBRecord {
+	fromJSON(json: string | QBRecordJSON): this {
 		if(typeof(json) === 'string'){
 			json = JSON.parse(json);
 		}
@@ -428,8 +432,8 @@ export class QBRecord {
 		}
 
 		if(json.data){
-			getObjectKeys(json.data).forEach((name) => {
-				this.set(name, (json as QBRecordJSON).data![name]);
+			Object.entries(json.data).forEach(([ property, value ]) => {
+				this.set(property, value);
 			});
 		}
 
@@ -449,10 +453,10 @@ export class QBRecord {
 			fields: this.getFields().map((field) => {
 				return field.toJSON();
 			}),
-			data: getObjectKeys(this._data).filter((name) => {
+			data: Object.entries(this._data).filter(([ name ]) => {
 				return !fidsToConvert || fidsToConvert.indexOf(name) !== -1;
-			}).reduce((data: QBRecordData, name) => {
-				data[name] = this._data[name];
+			}).reduce((data: Record<any, any>, [ name, value ]) => {
+				data[name] = value;
 
 				return data;
 			}, {})
@@ -479,17 +483,26 @@ export class QBRecord {
 	}
 
 	/**
+	 * Test if a variable is a `qb-record` object
+	 * 
+	 * @param obj A variable you'd like to test
+	 */
+	static IsQBRecord(obj: any): obj is QBRecord {
+		return ((obj || {}) as QBRecord).CLASS_NAME === QBRecord.CLASS_NAME;
+	}
+
+	/**
 	 * Returns a new QBRecord instance built off of `options`, that inherits configuration data from the passed in `data` argument.
 	 *
 	 * @param options QBRecord instance options
 	 * @param data Quick Base Record data
 	 */
-	static newRecord(options: Partial<QBRecordOptions>, data?: QBRecordData): QBRecord {
-		const newRecord = new QBRecord(options);
+	static newRecord<T extends QBRecordData>(options: Partial<QBRecordOptions<T>>, data?: Record<any, any>): QBRecord<T> {
+		const newRecord = new QBRecord<T>(options);
 
 		if(data){
-			getObjectKeys(data).forEach((property) => {
-				newRecord.set(property, data[property]);
+			Object.entries(data).forEach(([ property, value ]) => {
+				newRecord.set(property, value);
 			});
 		}
 
@@ -498,49 +511,39 @@ export class QBRecord {
 
 }
 
-/* Helpers */
-function getObjectKeys<O>(obj: O): (keyof O)[] {
-    return Object.keys(obj) as (keyof O)[];
-}
-
-/* Interfaces */
-interface Indexable {
-	[index: string]: any;
-}
-
-export interface QBRecordLoad {
+/* Types */
+export type QBRecordLoad = QuickBaseRequest & {
 	query?: string;
 	clist?: string|number[];
 }
 
-export interface QBRecordOptions {
+export type QBRecordData = Record<any, any>;
+export type QBFids<T extends QBRecordData> = {
+	[K in keyof T]: number;
+};
+
+export type QBRecordOptions<RecordData extends QBRecordData = {
+	recordid: number;
+	primaryKey: number;
+}> = {
 	quickbase: QuickBase | QuickBaseOptions;
 	tableId: string;
-	fids: QBRecordFids,
+	fids: Partial<QBFids<RecordData>>,
 	recordid?: number;
 	primaryKey?: number;
 }
 
-export interface QBRecordJSON {
+export type QBRecordJSON = {
 	quickbase?: QuickBaseOptions;
 	tableId?: string;
-	fids?: QBRecordFids;
+	fids?: Record<any, number>;
 	recordid?: string | number;
 	primaryKey?: string | number;
 	fields?: QBFieldJSON[];
-	data?: QBRecordData;
-}
-
-export type QBRecordData = {
-	[index in string | number]: any;
-}
-
-export type QBRecordFids = {
-	[index in string | number]: number;
+	data?: Record<any, any>;
 }
 
 /* Export to Browser */
 if(IS_BROWSER){
-	// @ts-ignore
 	window.QBRecord = QBRecord;
 }
