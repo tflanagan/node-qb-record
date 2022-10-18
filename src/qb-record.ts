@@ -488,7 +488,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	 * 
 	 * @param obj A variable you'd like to test
 	 */
-	static IsQBRecord(obj: any): obj is QBRecord {
+	static IsQBRecord<T extends QBRecordData = QBRecordData>(obj: any): obj is QBRecord<T> {
 		return ((obj || {}) as QBRecord).CLASS_NAME === QBRecord.CLASS_NAME;
 	}
 
