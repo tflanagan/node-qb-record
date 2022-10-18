@@ -87,7 +87,9 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 
 		this.setTableId(settings.tableId)
 			.setFids(settings.fids as Record<any, number>)
+			// @ts-ignore - my typescript skills fail me for now, tests are fine though
 			.set('recordid', settings.recordid)
+			// @ts-ignore - my typescript skills fail me for now, tests are fine though
 			.set('primaryKey', settings.primaryKey);
 
 		return this;
@@ -124,8 +126,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		}
 	}
 
-	get<T extends keyof RecordData>(field: T): RecordData[T];
-	get<T = any>(field: any): T;
+	get<F extends string>(field: F): F extends keyof RecordData ? RecordData[F] : any;
 	get(field: any): any {
 		return this._data[field];
 	}
@@ -354,9 +355,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		return this._data;
 	}
 
-	set<T extends keyof RecordData>(field: T, value: RecordData[T]): this;
-	set<T = any>(field: any, value: any): this;
-	set(field: any, value: any): this;
+	set<F extends string>(field: F, value: F extends keyof RecordData ? RecordData[F] : any): this;
 	set(field: any, value: any): this {
 		this._data[field] = value;
 
@@ -418,10 +417,12 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		}
 
 		if(json.recordid){
+			// @ts-ignore - my typescript skills fail me for now, tests are fine though
 			this.set('recordid', json.recordid);
 		}
 
 		if(json.primaryKey){
+			// @ts-ignore - my typescript skills fail me for now, tests are fine though
 			this.set('primaryKey', json.primaryKey);
 		}
 
