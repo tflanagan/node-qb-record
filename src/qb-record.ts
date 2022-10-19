@@ -546,5 +546,5 @@ export type QBRecordJSON = {
 
 /* Export to Browser */
 if(IS_BROWSER){
-	window.QBRecord = QBRecord;
+	window.QBRecord = exports;
 }

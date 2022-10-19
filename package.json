@@ -1,6 +1,6 @@
 {
   "name": "qb-record",
-  "version": "5.0.4",
+  "version": "5.0.5",
   "description": "A lightweight abstraction layer for Quick Base",
   "keywords": [
     "QuickBase",
@@ -43,8 +43,8 @@
   },
   "dependencies": {
     "deepmerge": "^4.2.2",
-    "qb-field": "5.0.4",
-    "quickbase": "5.0.4",
+    "qb-field": "5.0.5",
+    "quickbase": "5.0.5",
     "rfc4122": "^1.0.6"
   },
   "devDependencies": {
