@@ -126,6 +126,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		}
 	}
 
+	get<F extends keyof RecordData>(field: F): RecordData[F];
 	get<F extends string>(field: F): F extends keyof RecordData ? RecordData[F] : any;
 	get(field: any): any {
 		return this._data[field];
@@ -355,6 +356,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		return this._data;
 	}
 
+	set<F extends keyof RecordData>(field: F, value: RecordData[F]): this;
 	set<F extends string>(field: F, value: F extends keyof RecordData ? RecordData[F] : any): this;
 	set(field: any, value: any): this {
 		this._data[field] = value;
