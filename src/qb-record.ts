@@ -189,8 +189,8 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		return this._tableId;
 	}
 
-	async getTempToken({ requestOptions }: QuickBaseRequest): Promise<void> {
-		this._qb.getTempTokenDBID({
+	async getTempToken({ requestOptions }: QuickBaseRequest = {}): Promise<void> {
+		await this._qb.getTempTokenDBID({
 			dbid: this.getTableId(),
 			requestOptions
 		});
