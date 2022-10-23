@@ -132,10 +132,6 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		return this._data[field];
 	}
 
-	getTableId(): string {
-		return this._tableId;
-	}
-
 	getFid<T extends keyof RecordData>(field: T): number;
 	getFid(field: number, byId: true): string;
 	getFid(field: string | number, byId?: false): number;
@@ -187,6 +183,17 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 
 	getFields(): QBField[] {
 		return this._fields;
+	}
+
+	getTableId(): string {
+		return this._tableId;
+	}
+
+	async getTempToken({ requestOptions }: QuickBaseRequest): Promise<void> {
+		this._qb.getTempTokenDBID({
+			dbid: this.getTableId(),
+			requestOptions
+		});
 	}
 
 	async load({ clist, query, requestOptions }: QBRecordLoad = {}): Promise<Record<any, any>> {
