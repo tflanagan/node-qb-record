@@ -317,11 +317,11 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 
 		const results = await this._qb.upsert({
 			tableId: this.getTableId(),
-			mergeFieldId: mergeFieldId || this.getFid('recordid'),
+			mergeFieldId: mergeFieldId || this.getFid('primaryKey'),
 			data: [names.filter((name) => {
 				const fid = fids[name];
 
-				return !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1 || fid === this.getFid('recordid');
+				return !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1 || fid === this.getFid('primaryKey');
 			}).reduce((record, name) => {
 				const fid = fids[name];
 
@@ -342,6 +342,12 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 			}),
 			requestOptions
 		});
+
+		const error = results.metadata.lineErrors[0];
+
+		if(error){
+			throw new Error(error[0]);
+		}
 
 		const record = results.data[0];
 
@@ -494,7 +500,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 
 	/**
 	 * Test if a variable is a `qb-record` object
-	 * 
+	 *
 	 * @param obj A variable you'd like to test
 	 */
 	static IsQBRecord<T extends QBRecordData = QBRecordData>(obj: any): obj is QBRecord<T> {
@@ -507,7 +513,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	 * @param options QBRecord instance options
 	 * @param data Quick Base Record data
 	 */
-	static newRecord<T extends QBRecordData>(options: Partial<QBRecordOptions<T>>, data?: Record<any, any>): QBRecord<T> {
+	static NewRecord<T extends QBRecordData>(options: Partial<QBRecordOptions<T>>, data?: T): QBRecord<T> {
 		const newRecord = new QBRecord<T>(options);
 
 		if(data){
