@@ -314,14 +314,30 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	} = {}): Promise<Record<any, any>> {
 		const fids = this.getFids();
 		const names = Object.entries(fids).map(([ name ]) => name);
+		const mergeField = mergeFieldId || this.getFid('primaryKey');
 
 		const results = await this._qb.upsert({
 			tableId: this.getTableId(),
-			mergeFieldId: mergeFieldId || this.getFid('primaryKey'),
+			mergeFieldId: mergeField,
 			data: [names.filter((name) => {
 				const fid = fids[name];
+				const filtered = !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1 || fid === mergeField;
 
-				return !fidsToSave || fidsToSave.indexOf(fid) !== -1 || fidsToSave.indexOf(name) !== -1 || fid === this.getFid('primaryKey');
+				if(!filtered){
+					return false;
+				}
+
+				const field = this.getField(fid);
+
+				if(field && [
+					'lookup',
+					'summary',
+					'formula'
+				].indexOf(field.get('mode') || '') !== -1){
+					return false;
+				}
+
+				return true;
 			}).reduce((record, name) => {
 				const fid = fids[name];
 
