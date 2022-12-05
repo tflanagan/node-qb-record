@@ -359,7 +359,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 			requestOptions
 		});
 
-		const error = results.metadata.lineErrors[0];
+		const error = typeof(results.metadata.lineErrors) !== 'undefined' ? results.metadata.lineErrors[0] : false;
 
 		if(error){
 			throw new Error(error[0]);
