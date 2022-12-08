@@ -529,7 +529,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	 * @param options QBRecord instance options
 	 * @param data Quick Base Record data
 	 */
-	static NewRecord<T extends QBRecordData>(options: Partial<QBRecordOptions<T>>, data?: T): QBRecord<T> {
+	static NewRecord<T extends QBRecordData>(options: Partial<QBRecordOptions<T>>, data?: Partial<T>): QBRecord<T> {
 		const newRecord = new QBRecord<T>(options);
 
 		if(data){
