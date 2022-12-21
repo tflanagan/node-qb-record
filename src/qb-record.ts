@@ -362,7 +362,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		const error = typeof(results.metadata.lineErrors) !== 'undefined' ? results.metadata.lineErrors[1] : false;
 
 		if(error){
-			throw new Error(error[1]);
+			throw new Error(error.join('\n'));
 		}
 
 		const record = results.data[0];
