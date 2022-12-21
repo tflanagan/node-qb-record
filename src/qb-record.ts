@@ -359,10 +359,10 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 			requestOptions
 		});
 
-		const error = typeof(results.metadata.lineErrors) !== 'undefined' ? results.metadata.lineErrors[0] : false;
+		const error = typeof(results.metadata.lineErrors) !== 'undefined' ? results.metadata.lineErrors[1] : false;
 
 		if(error){
-			throw new Error(error[0]);
+			throw new Error(error[1]);
 		}
 
 		const record = results.data[0];
@@ -426,7 +426,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	 *
 	 * @param json QBRecord serialized JSON
 	 */
-	fromJSON(json: string | QBRecordJSON): this {
+	fromJSON(json: string | QBRecordJSON<RecordData>): this {
 		if(typeof(json) === 'string'){
 			json = JSON.parse(json);
 		}
@@ -475,7 +475,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	/**
 	 * Serialize the QBRecord instance into JSON
 	 */
-	toJSON(fidsToConvert?: (string | number)[]): QBRecordJSON {
+	toJSON(fidsToConvert?: (string | number)[]): QBRecordJSON<RecordData> {
 		return {
 			quickbase: this._qb.toJSON(),
 			tableId: this.getTableId(),
@@ -487,11 +487,11 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 			}),
 			data: Object.entries(this._data).filter(([ name ]) => {
 				return !fidsToConvert || fidsToConvert.indexOf(name) !== -1;
-			}).reduce((data: Record<any, any>, [ name, value ]) => {
+			}).reduce((data, [ name, value ]) => {
 				data[name] = value;
 
 				return data;
-			}, {})
+			}, {} as Record<any, any>)
 		};
 	}
 
@@ -500,7 +500,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	 *
 	 * @param json QBRecord serialized JSON
 	 */
-	static fromJSON(json: string | QBRecordJSON): QBRecord {
+	static fromJSON<T extends QBRecordData = QBRecordData>(json: string | QBRecordJSON<T>): QBRecord<T> {
 		if(typeof(json) === 'string'){
 			json = JSON.parse(json);
 		}
@@ -529,7 +529,7 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	 * @param options QBRecord instance options
 	 * @param data Quick Base Record data
 	 */
-	static NewRecord<T extends QBRecordData>(options: Partial<QBRecordOptions<T>>, data?: Partial<T>): QBRecord<T> {
+	static NewRecord<T extends QBRecordData = QBRecordData>(options: Partial<QBRecordOptions<T>>, data?: Partial<T>): QBRecord<T> {
 		const newRecord = new QBRecord<T>(options);
 
 		if(data){
@@ -565,14 +565,17 @@ export type QBRecordOptions<RecordData extends QBRecordData = {
 	primaryKey?: number;
 }
 
-export type QBRecordJSON = {
+export type QBRecordJSON<RecordData extends QBRecordData = {
+	recordid: number;
+	primaryKey: number;
+}>  = {
 	quickbase?: QuickBaseOptions;
 	tableId?: string;
-	fids?: Record<any, number>;
+	fids?: QBFids<RecordData>;
 	recordid?: string | number;
 	primaryKey?: string | number;
 	fields?: QBFieldJSON[];
-	data?: Record<any, any>;
+	data?: RecordData;
 }
 
 /* Export to Browser */

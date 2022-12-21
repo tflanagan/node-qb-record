@@ -37,7 +37,9 @@ const qbField = new QBField({
 	fid: -1
 });
 
-const qbRecord = new QBRecord({
+const qbRecord = new QBRecord<{
+	test: string;
+}>({
 	quickbase: qb
 });
 
