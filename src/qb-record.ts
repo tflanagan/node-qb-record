@@ -569,13 +569,13 @@ export type QBRecordJSON<RecordData extends QBRecordData = {
 	recordid: number;
 	primaryKey: number;
 }>  = {
-	quickbase?: QuickBaseOptions;
-	tableId?: string;
-	fids?: QBFids<RecordData>;
-	recordid?: string | number;
-	primaryKey?: string | number;
-	fields?: QBFieldJSON[];
-	data?: RecordData;
+	quickbase: QuickBaseOptions;
+	tableId: string;
+	fids: QBFids<RecordData>;
+	recordid: string | number;
+	primaryKey: string | number;
+	fields: QBFieldJSON[];
+	data: RecordData;
 }
 
 /* Export to Browser */
