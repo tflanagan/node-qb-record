@@ -342,10 +342,8 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 				const fid = fids[name];
 
 				if(fid){
-					const value = this.get(name);
-
 					record[fid] = {
-						value: value === undefined ? '' : value
+						value: replaceUndefinedWithString(this.get(name))
 					};
 				}
 
@@ -542,6 +540,11 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 	};
 
 }
+
+/* Helpers */
+export const replaceUndefinedWithString = (val: any) => {
+	return val === null || val === undefined || (typeof val === 'number' && isNaN(val)) ? '' : val
+};
 
 /* Types */
 export type QBRecordLoad = QuickBaseRequest & {
