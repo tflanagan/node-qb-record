@@ -5,6 +5,7 @@ import merge from 'deepmerge';
 import RFC4122 from 'rfc4122';
 import {
 	QuickBase,
+	QuickBaseError,
 	QuickBaseOptions,
 	QuickBaseRequest,
 	QuickBaseResponseDeleteRecords
@@ -316,7 +317,10 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 		const names = Object.entries(fids).map(([ name ]) => name);
 		const mergeField = mergeFieldId || this.getFid('primaryKey');
 
-		const results = await this._qb.upsert({
+		const {
+			headers,
+			data: results
+		} = await this._qb.upsert({
 			tableId: this.getTableId(),
 			mergeFieldId: mergeField,
 			data: [names.filter((name) => {
@@ -354,13 +358,14 @@ export class QBRecord<RecordData extends QBRecordData = QBRecordData> {
 			}).filter((val, i, arr) => {
 				return arr.indexOf(val) === i;
 			}),
-			requestOptions
+			requestOptions,
+			returnAxios: true
 		});
 
 		const error = typeof(results.metadata.lineErrors) !== 'undefined' ? results.metadata.lineErrors[1] : false;
 
 		if(error){
-			throw new Error(error.join('\n'));
+			throw new QuickBaseError(207, 'A partial success response was returned', error.join('\n'), headers['qb-api-ray']);
 		}
 
 		const record = results.data[0];
